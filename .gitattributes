@@ -1,0 +1,33 @@
+# Normalize line endings for text files
+* text=auto
+*.py   text eol=lf
+*.md   text eol=lf
+*.cir  text eol=lf
+*.sp   text eol=lf
+*.ps1  text eol=crlf
+
+# Binary CAD/FEA/office files: no diffs, no line-ending conversion.
+# To move any of these to Git LFS later, run e.g.:
+#   git lfs install
+#   git lfs track "*.sldprt"
+# then commit the updated .gitattributes.
+*.sldprt binary
+*.sldasm binary
+*.slddrw binary
+*.step   binary
+*.stp    binary
+*.iges   binary
+*.igs    binary
+*.stl    binary
+*.wbpj   binary
+*.wbpz   binary
+*.agdb   binary
+*.mechdb binary
+*.scdoc  binary
+*.slx    binary
+*.mat    binary
+*.xlsx   binary
+*.docx   binary
+*.pdf    binary
+*.png    binary
+*.jpg    binary

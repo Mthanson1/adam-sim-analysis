@@ -1,0 +1,4 @@
+name,E_MPa,nu,uts_MPa,sy_MPa,n,notes
+aa3003-o,69000,0.33,110,40,0.22,Typical handbook values (not design minima); n estimated
+aa3003-h14,69000,0.33,150,145,0.05,Typical handbook values (not design minima); n estimated
+aa1100-o,69000,0.33,90,34,0.25,Typical handbook values (not design minima); n estimated

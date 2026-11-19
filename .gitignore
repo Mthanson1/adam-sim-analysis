@@ -1,0 +1,66 @@
+# ---------- Solver output (regenerable) ----------
+# Ignore everything in results/ except the figures/ folder.
+**/results/*
+!**/results/figures/
+!**/results/.gitkeep
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# ---------- SPICE (LTspice / ngspice) ----------
+*.raw
+*.log
+*.fft
+*.net
+*.plt.bak
+
+# ---------- ANSYS Workbench / MAPDL ----------
+# Keep the .wbpj. Ignore the generated <project>_files/ tree (meshes + results, huge).
+# To hand off a full project, use File > Archive to make a .wbpz.
+*_files/
+*.lock
+*.rst
+*.rth
+*.rmg
+*.db
+*.dbb
+*.esav
+*.full
+*.emat
+*.mntr
+*.err
+*.out
+*.page
+*.ldhi
+*.abt
+
+# ---------- SolidWorks ----------
+~$*
+*.SLDBAK
+*.swbak
+*.bak
+*.cwr
+*.CWR
+
+# ---------- MATLAB / Simulink ----------
+*.asv
+*.autosave
+slprj/
+*.slxc
+*.mexw64
+
+# ---------- OS / editors ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/

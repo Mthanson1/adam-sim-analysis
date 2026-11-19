@@ -1,0 +1,10 @@
+numpy
+scipy
+pandas
+matplotlib
+jupyter
+ruff==0.17.6   # keep in sync with .github/workflows/lint.yml
+# Uncomment as needed:
+# ltspice            # parse LTspice .raw files from Python
+# PySpice            # drive ngspice from Python
+# ansys-mapdl-core   # PyAnsys: scripted MAPDL
