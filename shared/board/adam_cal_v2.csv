@@ -1,0 +1,75 @@
+refdes,value,unit,tol_pct,power_W,voltage_V,package,mpn,function,note
+R1,118000,ohm,1,,,,,buck FB top,
+R2,22100,ohm,1,,,,,buck FB bottom,
+R3,100000,ohm,1,,,,,Q1 gate pull-down,
+R4,10000,ohm,1,,,,,24V LED,
+R5,1000,ohm,1,,,,,5V LED,
+R6,680,ohm,1,,,,,3V3 LED,
+R7,4020,ohm,1,,,,,TL431 ref top,
+R8,10000,ohm,1,,,,,TL431 ref bottom,
+R9,10000,ohm,1,,,,,load cell ADC CS pull-up,
+R10,1000,ohm,0.1,,,,,load cell Rs +,
+R11,1000,ohm,0.1,,,,,load cell Rs -,
+R12,10,ohm,1,,,,,5VA RC filter,
+R13,7500,ohm,1,,,,,CH0 divider top,tolerance not set on schematic (1 % and 0.1 % both noted)
+R14,1800,ohm,1,,,,,CH0 divider bottom,tolerance not set on schematic (1 % and 0.1 % both noted)
+R15,7500,ohm,1,,,,,CH1 divider top,tolerance not set on schematic (1 % and 0.1 % both noted)
+R16,1800,ohm,1,,,,,CH1 divider bottom,tolerance not set on schematic (1 % and 0.1 % both noted)
+R17,10000,ohm,1,,,,,BOOT0 pull-down,
+R18,680,ohm,1,,,,,LED0,
+R19,680,ohm,1,,,,,LED1,
+R20,680,ohm,1,,,,,LED2,
+R21,680,ohm,1,,,,,Z_DRV LED,
+R22,10,ohm,1,,,,,VDDA RC filter,
+R23,10,ohm,1,,,,,5VP RC filter,
+R24,10000,ohm,1,,,,,prox ADC CS pull-up,
+R25,1000,ohm,0.1,,,,,prox CH0 Rs +,
+R26,1000,ohm,0.1,,,,,prox CH0 Rs -,
+R27,1000,ohm,0.1,,,,,prox CH1 Rs +,
+R28,1000,ohm,0.1,,,,,prox CH1 Rs -,
+R29,680,ohm,1,1,,2512,,UART TX series,
+R30,470,ohm,1,0.1,,0603,,Z_CONTACT series,value from R_SERIES note; package assumed
+R31,4700,ohm,1,0.125,,0805,,UART RX series,
+R32,470,ohm,1,0.1,,0603,,OUT0 series,value from R_SERIES note; package assumed
+R33,100000,ohm,1,,,,,Q2 gate pull-down,
+R34,100000,ohm,1,,,,,Q3 gate pull-down,
+C1,22e-6,F,20,,60,,,24V bulk,
+C3,2.2e-6,F,10,,50,,,buck input,X7R
+C4,22e-6,F,20,,,,,buck output,
+C5,1e-6,F,10,,,,,LDO input,
+C6,1e-6,F,10,,,,,LDO output / +3V3 bulk,TL431 note asks for 6.21 uF on +3V3; see study 02
+C10,10e-9,F,2,,,,,load cell Ccm +,C0G
+C11,10e-9,F,2,,,,,load cell Ccm -,C0G
+C12,100e-9,F,10,,,,,load cell Cdiff,tolerance assumed
+C13,10e-6,F,10,,,,,5VA filter,
+C17,100e-9,F,10,,,,,VDDA decoupling,
+C19,1e-6,F,10,,,,,VDDA decoupling,
+C18,100e-9,F,10,,,,,VDD decoupling,
+C20,100e-9,F,10,,,,,VDD decoupling,
+C21,100e-9,F,10,,,,,VDD decoupling,
+C22,10e-9,F,10,,,,,VDD decoupling,
+C23,4.7e-6,F,10,,,,,VDD decoupling,
+C25,10e-6,F,10,,,,,5VP filter,
+C28,10e-9,F,2,,,,,prox CH0 Ccm +,C0G
+C29,10e-9,F,2,,,,,prox CH0 Ccm -,C0G
+C30,10e-9,F,2,,,,,prox CH1 Ccm +,C0G
+C31,10e-9,F,2,,,,,prox CH1 Ccm -,C0G
+C32,100e-9,F,10,,,,,prox CH0 Cdiff,tolerance assumed
+C33,100e-9,F,10,,,,,prox CH1 Cdiff,tolerance assumed
+U2,,,,,,SOT-23-5,TLV77333PDBVR,3V3 LDO,
+U3,,,,,37,SOT-23-5,TL431AIDBVR,3V3 clamp,
+U4,,,,,,TSSOP-16,ADS1220IPWR,load cell ADC,
+U6,,,,,,TSSOP-16,ADS1220IPWR,prox ADC,
+Q1,,,,1,60,SOT-23,SI2309CDS-T1-GE3,reverse polarity PMOS,1 W at 25 C / 0.67 W at 70 C
+Q2,,,,0.225,60,SOT-23,2N7002,Z_CONTACT open drain,
+Q3,,,,0.225,60,SOT-23,2N7002,OUT0 open drain,
+D11,,,,0.2,85,SOT-363,BAV199DW,prox CH1 clamp,
+D12,,,,0.2,85,SOT-363,BAV199DW,prox CH0 clamp,
+D13,,,,0.2,85,SOT-363,BAV199DW,UART clamp,
+D15,,,,,33,SMA,SMAJ33CA,24V input TVS,
+D5,,,,,28,SMA,SMAJ28A,CH0 sensor supply TVS,
+D6,,,,,28,SMA,SMAJ28A,CH1 sensor supply TVS,
+ZD1,,,,0.5,15,SOD-123,BZT52C15,Q1 gate zener,
+F1,,,,,60,,FSMD020-60-R,24V input PTC,hold 200 mA / trip 400 mA
+F2,,,,,60,1210,JK-SMD1210-005-60V,CH0 sensor PTC,hold 50 mA / trip 150 mA
+F3,,,,,60,1210,JK-SMD1210-005-60V,CH1 sensor PTC,hold 50 mA / trip 150 mA

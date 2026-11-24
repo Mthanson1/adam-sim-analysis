@@ -10,8 +10,10 @@ adam-sim-analysis/
 ├── electrical/      # SPICE (LTspice/ngspice), power budgets, signal analysis
 ├── mechanical/      # Structural FEA, tolerance stacks, kinematics
 ├── shared/          # Code and data used across domains
-│   ├── adam_common/ #   Python helpers (paths, plotting style, material loader)
-│   └── materials/   #   Material property tables (CSV; load with adam_common.load_material)
+│   ├── adam_common/ #   Python helpers (paths, plotting, material/parts loaders, ngspice runner)
+│   ├── board/       #   Board parts tables (CSV, SI units; load with adam_common.load_parts)
+│   ├── materials/   #   Material property tables (CSV; load with adam_common.load_material)
+│   └── spice_models/#   Vendor SPICE models + ngspice self-test
 └── templates/study/ # Copy this to start a new study
 ```
 
@@ -53,6 +55,24 @@ pip install -r requirements.txt
 pip install -e shared   # makes `import adam_common` work from any study
 ruff check .            # lint (config in ruff.toml)
 ```
+
+## SPICE setup
+
+Electrical studies use **ngspice** in batch mode, driven from Python by
+[`adam_common.spice`](shared/adam_common/spice.py). Netlists are plain-text `.cir` files in
+each study's `model/` folder.
+
+1. Download `ngspice-<ver>_64.7z` (version 47 or later) from
+   <https://sourceforge.net/projects/ngspice/files/ng-spice-rework/> and extract it to
+   `C:\Spice64` (so `C:\Spice64\bin\ngspice_con.exe` exists). Anywhere else works if you
+   set the `NGSPICE` env var to the full path of `ngspice_con.exe`.
+   On Linux or macOS, install the `ngspice` package instead.
+2. Run the self-test: `python shared/spice_models/selftest.py`
+
+Component values come from the board parts table
+[`shared/board/adam_cal_v2.csv`](shared/board/adam_cal_v2.csv) (one row per refdes, SI units).
+Netlists refer to them by refdes (`R13 a b {R13}`), so a BOM change is a one-line CSV edit.
+Vendor models live in [`shared/spice_models/`](shared/spice_models/README.md).
 
 Contribution rules (branch + PR per study, code style) are in [CLAUDE.md](CLAUDE.md).
 

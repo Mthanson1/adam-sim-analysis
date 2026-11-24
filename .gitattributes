@@ -4,6 +4,10 @@
 *.md   text eol=lf
 *.cir  text eol=lf
 *.sp   text eol=lf
+*.inc  text eol=lf
+*.lib  text eol=lf
+*.mod  text eol=lf
+*.csv  text eol=lf
 *.ps1  text eol=crlf
 
 # Binary CAD/FEA/office files: no diffs, no line-ending conversion.
