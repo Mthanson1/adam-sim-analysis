@@ -1,9 +1,0 @@
-* BAV199 low-leakage diode (one junction of a BAV199 / BAV199DW double diode).
-* NOT a vendor model: Nexperia's SPICE files could not be downloaded automatically.
-* IS, N, RS fitted (scipy least squares, residual < 2 mV) to the datasheet MAXIMUM
-* forward voltages: 0.90 V @ 1 mA, 1.00 V @ 10 mA, 1.10 V @ 50 mA, 1.25 V @ 150 mA.
-* Max Vf is conservative for clamped-node voltage. CJO = 2 pF (datasheet max Cd),
-* BV = 85 V (rated reverse voltage), TT from the ~3 us reverse recovery time.
-* Reverse leakage (5 nA max) is not modeled; it is handled in the analysis scripts.
-* Replace with the Nexperia model (nexperia.com/product/BAV199, SPICE model) if available.
-.model BAV199 D(IS=5.672e-14 N=1.4742 RS=1.059 CJO=2p M=0.33 VJ=0.7 TT=3u BV=85 IBV=100n)
