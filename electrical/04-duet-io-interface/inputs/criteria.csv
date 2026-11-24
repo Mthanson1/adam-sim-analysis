@@ -1,0 +1,13 @@
+name,value,unit,source,note
+v_il,0.9,V,schematic sheet 6 note,Duet input low threshold
+v_ih,2.4,V,schematic sheet 6 note,Duet input high threshold
+rpu_opto,4700,ohm,schematic sheet 6,Duet opto input pull-up
+rpu_nonopto,27000,ohm,schematic sheet 6,Duet non-opto input pull-up
+c_cable_min,100e-12,F,assumption,about 1 m of cable
+c_cable_max,1e-9,F,assumption,about 10 m of cable
+od_rise_max,100e-6,s,study requirement,open-drain release to V_IH; 10 % of a 1 ms budget
+baud,115200,1/s,assumption,UART baud rate
+uart_edge_frac,0.05,1,study requirement,10-90 % edge time as a fraction of one bit
+v_fault,24,V,schematic,fault on the connector
+fet_p_max,0.225,W,schematic sheet 6 note,2N7002 power dissipation at 25 C
+r30_p_max,0.1,W,assumption,R30/R32 assumed 0603

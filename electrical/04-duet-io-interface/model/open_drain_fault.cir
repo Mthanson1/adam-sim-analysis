@@ -1,0 +1,11 @@
+* Open-drain fault: connector driven 0 -> 30 V with the FET on (gate 3.3 V). Typical (onsemi vendor model) and worst (fitted) FET.
+.include 2n7002_onsemi.lib
+.include nmos_2n7002.lib
+Vg gq 0 DC 3.3
+Vf ext 0 DC 0
+XT dt gq 0 F2N7002
+R30T ext dt {R30}
+XW dw gq 0 N2N7002_WORST
+R30W ext dw {R30}
+.dc Vf 0 30 0.1
+.end
