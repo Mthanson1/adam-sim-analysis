@@ -1,11 +1,12 @@
-* Z_CONTACT / OUT0: MCU pin -> 2N7002 -> R30 -> cable -> Duet input. Typical (T) and worst (W) FET.
+* Z_CONTACT / OUT0: MCU pin -> 2N7002 -> R30 -> cable -> Duet input. Typical (T, onsemi vendor model) and worst (W, fitted) FET.
 * FET on from 100 us to 500 us.
+.include 2n7002_onsemi.lib
 .include nmos_2n7002.lib
 .include duet_input.inc
 Vmcu g 0 PULSE(0 3.3 100u 5n 5n 400u 1m)
 Rpin g gq 40
 R33 gq 0 {R33}
-XT dt gq 0 N2N7002
+XT dt gq 0 F2N7002
 R30T dt extt {R30}
 CcabT extt 0 {CCABLE}
 XinT extt int duet_input

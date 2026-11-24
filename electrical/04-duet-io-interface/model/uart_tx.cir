@@ -1,6 +1,6 @@
 * UART TX: MCU pin (40 ohm) -> clamp node (BAV199 pair) -> R29 -> cable -> Duet input.
 * One low bit then idle high, bit time TBIT.
-.include bav199.lib
+.include bav199_nexperia.lib
 .include duet_input.inc
 Vmcu pin 0 PULSE(3.3 0 2u 2n 2n {TBIT} {4*TBIT})
 Rpin pin node 40

@@ -28,18 +28,22 @@ Check the signals between the calibration board and the Duet (schematic sheets 6
     [`model/open_drain_fault.cir`](model/open_drain_fault.cir): each contains a typical and a
     worst-case FET.
   - [`model/uart_tx.cir`](model/uart_tx.cir).
-- 2N7002: [`shared/spice_models/nmos_2n7002.lib`](../../shared/spice_models/nmos_2n7002.lib).
-  This is a **Level 1 fit to the onsemi datasheet**, not a vendor model. The typical variant
-  uses V_th 2.1 V and 1.7 Ω at V_GS = 5 V. The worst-case variant uses V_th 2.5 V and 7.5 Ω at
-  V_GS = 5 V. At the MCU's 3.3 V gate drive that works out to about 4.5 Ω and 23 Ω.
-- BAV199: datasheet-fitted model (see study 02).
+- 2N7002, two variants:
+  - **typical:** onsemi's BSIM3 vendor model
+    ([`2n7002_onsemi.lib`](../../shared/spice_models/2n7002_onsemi.lib)). It gives 1.8 Ω at
+    V_GS = 5 V and 3.8 Ω at the MCU's 3.3 V.
+  - **worst case:** a Level 1 fit to the datasheet limits
+    ([`nmos_2n7002.lib`](../../shared/spice_models/nmos_2n7002.lib)). It uses V_th 2.5 V and
+    7.5 Ω at V_GS = 5 V, which is about 23 Ω at 3.3 V. Vendor models describe a typical part,
+    so the worst case has to be fitted.
+- BAV199: Nexperia's model.
 - Criteria: [`inputs/criteria.csv`](inputs/criteria.csv).
 
 ## Assumptions
 - Cable capacitance is 100 pF–1 nF, roughly 1–10 m. The Duet input pin is 10 pF.
 - The MCU pin is an ideal 3.3 V source behind 40 Ω.
-- The Level 1 FET fit is good enough for R_DS(on) and saturation current. Its capacitances
-  are fixed at the datasheet's 25 V values.
+- The worst-case Level 1 FET fit is good enough for R_DS(on) and saturation current. Its
+  capacitances are fixed at the datasheet's 25 V values.
 
 ## How to reproduce
 ```powershell
@@ -52,16 +56,16 @@ python electrical/04-duet-io-interface/scripts/run_sims.py   # ~6 s
 | Open drain, worst-case FET | 4.7k, 100 pF | 4.7k, 1 nF | 27k, 100 pF | 27k, 1 nF | Limit |
 |---|---|---|---|---|---|
 | V_low at Duet pin | 0.31 V | 0.31 V | 0.06 V | 0.06 V | ≤ 0.9 V **PASS** |
-| Fall to V_IL | 0.26 µs | 0.88 µs | 0.22 µs | 0.80 µs | info |
+| Fall to V_IL | 0.27 µs | 0.89 µs | 0.25 µs | 0.81 µs | info |
 | Rise to V_IH | 0.83 µs | 5.9 µs | 4.4 µs | 35.5 µs | ≤ 100 µs **PASS** |
 
 Asserting Z_CONTACT adds under 1 µs to the contact latency from study 03.
 
-| Open-drain fault, 24 V on connector, FET on | Typical FET | Worst-case FET |
+| Open-drain fault, 24 V on connector, FET on | Typical FET (onsemi model) | Worst-case FET (fit) |
 |---|---|---|
-| Current | 50.6 mA | 19.6 mA (FET saturates) |
-| R30 power (0603, 100 mW) | 1202 mW **FAIL** | 180 mW **FAIL** |
-| 2N7002 power (225 mW) | 12 mW PASS | **290 mW FAIL** |
+| Current | 50.7 mA | 19.6 mA (FET saturates) |
+| R30 power (0603, 100 mW) | 1206 mW **FAIL** | 180 mW **FAIL** |
+| 2N7002 power (225 mW) | 10 mW PASS | **290 mW FAIL** |
 
 The schematic expects R30/R32 to "fail before the NMOS", and with a typical FET it does.
 **With a worst-case FET, the design intent doesn't hold.** At 3.3 V gate drive, a 2.5 V
@@ -77,9 +81,9 @@ Options:
 | UART TX | Result | Limit | |
 |---|---|---|---|
 | V_low at Duet pin | 0.44 V | ≤ 0.9 V | **PASS** |
-| Slowest edge at 100 pF | 295 ns | ≤ 434 ns | **PASS** |
-| Slowest edge at 220 / 470 / 1000 pF | 420 / 720 / 1420 ns | n/a | info |
-| Largest cable C for 5 % edges | 232 pF | n/a | info |
+| Slowest edge at 100 pF | 290 ns | ≤ 434 ns | **PASS** |
+| Slowest edge at 220 / 470 / 1000 pF | 415 / 720 / 1420 ns | n/a | info |
+| Largest cable C for 5 % edges | 236 pF | n/a | info |
 
 The edge time is set by (40 Ω + 680 Ω) ‖ 4.7k ≈ 625 Ω driving the cable. At 115200 baud the
 5 % criterion allows about 230 pF, roughly 2 m of typical cable. A UART samples mid-bit, so
