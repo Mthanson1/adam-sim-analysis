@@ -127,6 +127,10 @@ The R30/R32 FAIL is by design: the schematic note says the resistor "fails befor
 Thick film usually fails open under that overload, but that is not guaranteed. A 1206 or
 larger part, or a PTC, would make the open-drain outputs survive a fault instead.
 
+**Update from study 04:** this row assumes a 7 Ω FET. Study 04 simulates the worst-case
+2N7002 at 3.3 V gate drive. That part saturates near 20 mA and dissipates about 290 mW itself
+(rated 225 mW), with R30 at 180 mW. So with worst-case parts, R30 is not guaranteed to fail first.
+
 If the MCU happens to be driving TX low when the fault hits, about **33 mA** flows into the
 STM32 pin through R29 (24 V / 720 Ω). Check that against the STM32G474 I/O current limit.
 
