@@ -1,22 +1,5 @@
-* Input-protection devices for the reverse-polarity sim. NOT vendor models: fitted stand-ins,
-* kept with this study because nothing else uses them.
-*
-* SI2309CDS P-MOSFET, Level 1 (Vishay Si2309CDS datasheet, doc 68980 Rev. A):
-*   VGS(th) -1 to -3 V (VTO = -1.5 here; lower |VTO| turns on more easily, the worst case for
-*   capacitive turn-on during hot-plug). RDS(on) 0.345 ohm max at VGS = -10 V:
-*   KP = 1 / (0.345 * (10 - 1.5)) = 0.341 A/V^2. Ciss 210 pF, Coss 28 pF, Crss 20 pF at
-*   VDS = -30 V, fixed here: Cgd = 20p, Cgs = 190p, Cds = 8p. Body diode VSD 0.8 V typ at 0.75 A.
-*   IDSS (1 uA max at -60 V) is not modeled; it is reported from the datasheet.
-* Pins: D G S
-.subckt SI2309CDS d g s
-M1 d g s s PM_SI2309
-Cgs g s 190p
-Cgd g d 20p
-Cds d s 8p
-Dbody d s DBODY_SI2309
-.ends SI2309CDS
-.model PM_SI2309 PMOS(LEVEL=1 VTO=-1.5 KP=0.341 LAMBDA=0.01)
-.model DBODY_SI2309 D(IS=1e-9 N=1.5 RS=0.1 BV=60 CJO=30p)
+* TVS and zener stand-ins for the reverse-polarity sim. NOT vendor models; kept with this
+* study because nothing else uses them. Q1 uses Vishay's Si2309CDS model (shared/spice_models).
 *
 * SMAJ33CA bidirectional TVS as two series zeners (breakdown 36.7 V min per the SMAJ family).
 .subckt SMAJ33CA a b
@@ -24,6 +7,9 @@ D1 a m DTVS
 D2 b m DTVS
 .ends SMAJ33CA
 .model DTVS D(IS=1e-12 N=1 RS=0.3 BV=36.7 IBV=1m CJO=1n)
+*
+* SMAJ28A unidirectional TVS on each sensor supply (breakdown 31.1 V min per the SMAJ family).
+.model DTVS28 D(IS=1e-12 N=1 RS=0.3 BV=31.1 IBV=1m CJO=1n)
 *
 * BZT52C15 15 V zener (gate-source clamp).
 .model DZ15 D(IS=1e-14 N=1 RS=5 BV=15 IBV=5m CJO=40p)

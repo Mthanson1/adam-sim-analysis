@@ -11,10 +11,10 @@ R9,10000,ohm,1,,,,,load cell ADC CS pull-up,
 R10,1000,ohm,0.1,,,,,load cell Rs +,
 R11,1000,ohm,0.1,,,,,load cell Rs -,
 R12,10,ohm,1,,,,,5VA RC filter,
-R13,7500,ohm,1,,,,,CH0 divider top,tolerance not set on schematic (1 % and 0.1 % both noted)
-R14,1800,ohm,1,,,,,CH0 divider bottom,tolerance not set on schematic (1 % and 0.1 % both noted)
-R15,7500,ohm,1,,,,,CH1 divider top,tolerance not set on schematic (1 % and 0.1 % both noted)
-R16,1800,ohm,1,,,,,CH1 divider bottom,tolerance not set on schematic (1 % and 0.1 % both noted)
+R13,7500,ohm,1,,,,,CH0 divider top,standard 1 %; 0.1 % precision option evaluated in study 01
+R14,1800,ohm,1,,,,,CH0 divider bottom,standard 1 %; 0.1 % precision option evaluated in study 01
+R15,7500,ohm,1,,,,,CH1 divider top,standard 1 %; 0.1 % precision option evaluated in study 01
+R16,1800,ohm,1,,,,,CH1 divider bottom,standard 1 %; 0.1 % precision option evaluated in study 01
 R17,10000,ohm,1,,,,,BOOT0 pull-down,
 R18,680,ohm,1,,,,,LED0,
 R19,680,ohm,1,,,,,LED1,
@@ -28,21 +28,21 @@ R26,1000,ohm,0.1,,,,,prox CH0 Rs -,
 R27,1000,ohm,0.1,,,,,prox CH1 Rs +,
 R28,1000,ohm,0.1,,,,,prox CH1 Rs -,
 R29,680,ohm,1,1,,2512,,UART TX series,
-R30,470,ohm,1,0.1,,0603,,Z_CONTACT series,value from R_SERIES note; package assumed
+R30,470,ohm,1,0.1,,0603,,Z_CONTACT series,sacrificial pull-down resistor (sheet 6); package assumed
 R31,4700,ohm,1,0.125,,0805,,UART RX series,
-R32,470,ohm,1,0.1,,0603,,OUT0 series,value from R_SERIES note; package assumed
+R32,470,ohm,1,0.1,,0603,,OUT0 series,sacrificial pull-down resistor (sheet 6); package assumed
 R33,100000,ohm,1,,,,,Q2 gate pull-down,
 R34,100000,ohm,1,,,,,Q3 gate pull-down,
 C1,22e-6,F,20,,60,,,24V bulk,
 C3,2.2e-6,F,10,,50,,,buck input,X7R
 C4,22e-6,F,20,,,,,buck output,
 C5,1e-6,F,10,,,,,LDO input,
-C6,1e-6,F,10,,,,,LDO output / +3V3 bulk,"part of the 6.21 uF total on +3V3 (C6, C7, C18, C20-C24)"
+C6,10e-6,F,10,,,,,LDO output / +3V3 bulk,"raised from 1 uF; +3V3 total 15.21 uF nominal, ~10 uF effective after DC bias (sheet 2 note)"
 C7,100e-9,F,10,,,,,load cell ADC DVDD decoupling,on +3V3
 C24,100e-9,F,10,,,,,prox ADC DVDD decoupling,on +3V3
 C10,10e-9,F,2,,,,,load cell Ccm +,C0G
 C11,10e-9,F,2,,,,,load cell Ccm -,C0G
-C12,100e-9,F,10,,,,,load cell Cdiff,tolerance assumed
+C12,100e-9,F,2,,,,,load cell Cdiff,precision cap
 C13,10e-6,F,10,,,,,5VA filter,
 C17,100e-9,F,10,,,,,VDDA decoupling,
 C19,1e-6,F,10,,,,,VDDA decoupling,
@@ -56,8 +56,8 @@ C28,10e-9,F,2,,,,,prox CH0 Ccm +,C0G
 C29,10e-9,F,2,,,,,prox CH0 Ccm -,C0G
 C30,10e-9,F,2,,,,,prox CH1 Ccm +,C0G
 C31,10e-9,F,2,,,,,prox CH1 Ccm -,C0G
-C32,100e-9,F,10,,,,,prox CH0 Cdiff,tolerance assumed
-C33,100e-9,F,10,,,,,prox CH1 Cdiff,tolerance assumed
+C32,100e-9,F,2,,,,,prox CH0 Cdiff,precision cap
+C33,100e-9,F,2,,,,,prox CH1 Cdiff,precision cap
 U2,,,,,,SOT-23-5,TLV77333PDBVR,3V3 LDO,
 U3,,,,,37,SOT-23-5,TL431AIDBVR,3V3 clamp,
 U4,,,,,,TSSOP-16,ADS1220IPWR,load cell ADC,

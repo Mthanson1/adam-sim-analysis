@@ -1,5 +1,6 @@
 * Input stage (sheet 2): J1 -> F1 (fixed R) -> TVS -> Q1 high-side PMOS -> board +24 V load.
 * Input ramps from 0 to VIN over TRISE starting at 100 us (hot-plug).
+.include si2309cds_vishay.lib
 .include input_devices.lib
 Vin j1 0 PWL(0 0 100u 0 {100u + TRISE} {VIN})
 * F1 FSMD020-60-R initial resistance; PTC tripping is not modeled.
@@ -7,10 +8,18 @@ RF1 j1 vin_p 0.8
 XD15 vin_p 0 SMAJ33CA
 * Q1: drain on the input, source on the board rail; R3 pulls the gate to GND,
 * ZD1 limits VGS to -15 V (cathode on the source).
-XQ1 vin_p g vout SI2309CDS
+XQ1 vin_p g vout Si2309CDS
 R3 g 0 {R3}
 DZ1 g vout DZ15
 C1 vout 0 {C1}
 Rload vout 0 {RLOAD}
+* Optional gate-source capacitor (proposed fix); CGSEXT = 1 pF is effectively absent.
+Cgsext g vout {CGSEXT}
+* Sensor supplies (sheets 4/5): F2/F3 (2.8 ohm initial) into SMAJ28A, anode on GND. They
+* forward-conduct if the board rail goes negative.
+RF2 vout s0 2.8
+D5 0 s0 DTVS28
+RF3 vout s1 2.8
+D6 0 s1 DTVS28
 .tran 0.1u 2m 0 0.1u
 .end
