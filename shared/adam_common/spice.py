@@ -118,7 +118,7 @@ def run_ngspice(netlist, out_dir, params: dict[str, float] | None = None,
     deck.write_text(build_deck(netlist, params or {}, board))
     # ngspice reads .spiceinit from the working directory before parsing the deck,
     # which is the only place the compatibility mode takes effect for model files.
-    (out_dir / ".spiceinit").write_text(f"set ngbehavior={compat}\n")
+    (out_dir / ".spiceinit").write_text(f"set ngbehavior={compat}\nset filetype=binary\n")
 
     result = subprocess.run(
         [str(find_ngspice()), "-b", "-r", raw.name, "-o", log.name, deck.name],
@@ -132,14 +132,21 @@ def run_ngspice(netlist, out_dir, params: dict[str, float] | None = None,
 
 
 def monte_carlo(netlist, out_dir, sampler: Callable[[np.random.Generator], dict[str, float]],
-                n: int, seed: int = 0, **run_kwargs) -> list[tuple[dict[str, float], RawRead]]:
-    """Run `netlist` n times with parameters drawn by `sampler(rng)`; return (params, raw) pairs."""
+                n: int, seed: int = 0, keep_files: bool = False,
+                **run_kwargs) -> list[tuple[dict[str, float], RawRead]]:
+    """Run `netlist` n times with parameters drawn by `sampler(rng)`; return (params, raw) pairs.
+
+    Each run's deck, log and .raw are deleted once read unless keep_files=True.
+    """
     rng = np.random.default_rng(seed)
     runs = []
     for i in range(n):
         params = sampler(rng)
-        raw = run_ngspice(netlist, out_dir, params=params,
-                          name=f"{Path(netlist).stem}_mc{i:04d}", **run_kwargs)
+        name = f"{Path(netlist).stem}_mc{i:04d}"
+        raw = run_ngspice(netlist, out_dir, params=params, name=name, **run_kwargs)
+        if not keep_files:
+            for ext in (".cir", ".log", ".raw"):
+                (Path(out_dir) / f"{name}{ext}").unlink(missing_ok=True)
         runs.append((params, raw))
     return runs
 
