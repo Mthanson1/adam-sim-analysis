@@ -16,6 +16,7 @@ import shutil
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from spicelib import RawRead
@@ -132,11 +133,13 @@ def run_ngspice(netlist, out_dir, params: dict[str, float] | None = None,
 
 
 def monte_carlo(netlist, out_dir, sampler: Callable[[np.random.Generator], dict[str, float]],
-                n: int, seed: int = 0, keep_files: bool = False,
-                **run_kwargs) -> list[tuple[dict[str, float], RawRead]]:
-    """Run `netlist` n times with parameters drawn by `sampler(rng)`; return (params, raw) pairs.
+                n: int, extract: Callable[[RawRead], Any], seed: int = 0,
+                keep_files: bool = False, **run_kwargs) -> list[tuple[dict[str, float], Any]]:
+    """Run `netlist` n times with parameters drawn by `sampler(rng)`.
 
-    Each run's deck, log and .raw are deleted once read unless keep_files=True.
+    Returns (params, extract(raw)) pairs. spicelib reads traces lazily from disk, so
+    `extract` must pull out everything needed before the run's files are deleted
+    (skipped with keep_files=True).
     """
     rng = np.random.default_rng(seed)
     runs = []
@@ -144,10 +147,10 @@ def monte_carlo(netlist, out_dir, sampler: Callable[[np.random.Generator], dict[
         params = sampler(rng)
         name = f"{Path(netlist).stem}_mc{i:04d}"
         raw = run_ngspice(netlist, out_dir, params=params, name=name, **run_kwargs)
+        runs.append((params, extract(raw)))
         if not keep_files:
             for ext in (".cir", ".log", ".raw"):
                 (Path(out_dir) / f"{name}{ext}").unlink(missing_ok=True)
-        runs.append((params, raw))
     return runs
 
 
