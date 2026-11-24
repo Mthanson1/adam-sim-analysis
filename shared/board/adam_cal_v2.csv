@@ -58,6 +58,7 @@ C30,10e-9,F,2,,,,,prox CH1 Ccm +,C0G
 C31,10e-9,F,2,,,,,prox CH1 Ccm -,C0G
 C32,100e-9,F,2,,,,,prox CH0 Cdiff,precision cap
 C33,100e-9,F,2,,,,,prox CH1 Cdiff,precision cap
+C35,10e-9,F,10,,,,,Q1 gate-source cap,"reverse hot-plug protection (study 05); footprint not yet assigned"
 U2,,,,,,SOT-23-5,TLV77333PDBVR,3V3 LDO,
 U3,,,,,37,SOT-23-5,TL431AIDBVR,3V3 clamp,
 U4,,,,,,TSSOP-16,ADS1220IPWR,load cell ADC,
