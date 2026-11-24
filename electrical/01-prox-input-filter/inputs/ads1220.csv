@@ -1,0 +1,14 @@
+name,value,unit,source,note
+f_mod,256000,Hz,ADS1220 SBAS501D sec 6.6 note,normal mode with internal 4.096 MHz oscillator
+noise_rms,3.89e-6,V,ADS1220 SBAS501D Table 7-3 p17,normal mode 20 SPS gain 1 PGA disabled; measured at AVDD 3.3 V
+noise_pp,13.43e-6,V,ADS1220 SBAS501D Table 7-3 p17,same conditions as noise_rms
+vref,2.048,V,ADS1220 SBAS501D sec 6.5 p7,internal reference nominal
+vref_tol,0.00146,1,ADS1220 SBAS501D sec 6.5 p7,initial accuracy 2.045 to 2.051 V at 25 C
+vref_drift,30e-6,1/K,ADS1220 SBAS501D sec 6.5 p7,max
+gain_err,0.001,1,ADS1220 SBAS501D sec 6.5 p7,PGA-disabled is 0.015 % typ with no max; uses the PGA-enabled max of 0.1 %
+gain_drift,4e-6,1/K,ADS1220 SBAS501D sec 6.5 p7,PGA-enabled max; PGA-disabled is 1 ppm/K typ
+offset,30e-6,V,ADS1220 SBAS501D sec 6.5 p7,gain 1 max at 25 C; PGA-disabled typ is 4 uV
+offset_drift,0.25e-6,V/K,ADS1220 SBAS501D sec 6.5 p7,PGA disabled typ
+inl,15e-6,1,ADS1220 SBAS501D sec 6.5 p7,max in units of FSR (FSR = 2 * vref)
+i_abs,15e-9,A,ADS1220 SBAS501D Fig 6-21 to 6-24 p13,PGA disabled; figure full-scale used as bound (no table value)
+nmrr_60Hz,90,dB,ADS1220 SBAS501D sec 6.5 p7,20 SPS with simultaneous 50/60 Hz rejection (50/60 = 01b)

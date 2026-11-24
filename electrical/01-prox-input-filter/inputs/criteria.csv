@@ -1,0 +1,16 @@
+name,value,unit,source,note
+atten_fmod_min,50,dB,study requirement,anti-alias attenuation at f_mod
+f_buck,400000,Hz,schematic sheet 2,LMR51606 switching frequency
+f_line,60,Hz,,mains
+v_cm,0.01,V,assumption,peak ground disturbance between sensor return and ADC ground; buck ripple is ~9 mV pk-pk
+sensor_response,1e-3,s,schematic sheet 4,DW-AS-509-M12-309 response time
+settle_frac_cal,1e-3,1,study requirement,0.1 % settling for static calibration
+settle_bits,16,bits,study requirement,
+mc_runs,500,1,,
+temp_span,10,K,assumption,lab temperature change between calibration and use
+sensor_range_mm,6,mm,schematic sheet 4,nominal sensing distance 0-6 mm
+sensor_span_V,10,V,schematic sheet 4,0-10 V output; assumed linear over the range
+resistor_tcr,100e-6,1/K,assumption,1 % thick-film; divider tracking not assumed
+clamp_leak,5e-9,A,schematic sheet 7 (BAV199),per diode reverse leakage
+cal_error_max_mm,0.005,mm,provisional,replace with ADAM accuracy requirement
+r26_balanced,2430,ohm,proposal (study 01),R26 = Rs + R13||R14 balances the source impedance of the two legs
