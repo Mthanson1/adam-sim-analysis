@@ -1,0 +1,10 @@
+* Prox filter AC: differential response (copy A) and CM-to-DM conversion (copy B)
+.include prox_filter.inc
+* Copy A: sensor output swings, both grounds equal.
+Vdm a_in 0 DC 0 AC 1
+XA a_in 0 a_p a_n prox_filter
+* Copy B: sensor return moves against ADC ground (ground noise, buck ripple), sensor output = return.
+Vcm b_gs 0 DC 0 AC 1
+XB b_gs b_gs b_p b_n prox_filter
+.ac dec 100 1 10meg
+.end

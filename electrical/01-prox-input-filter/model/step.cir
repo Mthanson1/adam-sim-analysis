@@ -1,0 +1,6 @@
+* Prox filter step response: 0 -> 10 V sensor step at t = 100 us
+.include prox_filter.inc
+Vin in 0 PWL(0 0 100u 0 101u 10)
+X1 in 0 p n prox_filter
+.tran 1u 10m 0 1u
+.end
