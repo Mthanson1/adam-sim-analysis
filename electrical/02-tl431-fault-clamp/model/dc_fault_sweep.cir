@@ -1,0 +1,10 @@
+* DC fault sweep: all clamped inputs driven 0 -> 30 V, LDO at nominal set-point
+* Vendor models are included here, not in the .inc files: run_ngspice only resolves top-level includes.
+.include tl431.lib
+.include rail.inc
+.include bav199.lib
+.include fault_paths.inc
+Vset ldo_set 0 DC {VSET}
+Vf fault 0 DC 0
+.dc Vf 0 30 0.1
+.end

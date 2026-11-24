@@ -1,0 +1,7 @@
+* 3V3 power-up: LDO ramps to VPK over TSTR, then settles to VSET; TL431 must stay off
+* Vendor models are included here, not in the .inc files: run_ngspice only resolves top-level includes.
+.include tl431.lib
+.include rail.inc
+Vset ldo_set 0 PWL(0 0 {TSTR} {VPK} {TSTR + 200u} {VSET})
+.tran 1u 1.5m 0 1u
+.end
