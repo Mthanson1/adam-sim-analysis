@@ -1,0 +1,10 @@
+name,value,unit,source,note
+r_bridge,1000,ohm,schematic sheet 3,R_BRDG estimate on the schematic
+v_exc,5.0,V,schematic sheet 3,bridge excitation +5VA (ratiometric reference)
+sens_mV_per_V,1.0,mV/V,FRC4115 (5 kg),rated output of the planned load cell
+capacity_g,5000,g,FRC4115 (5 kg),rated capacity of the planned load cell
+threshold_sigma,6,1,study requirement,trigger threshold in units of rms noise
+t_firmware,20e-6,s,assumption,DRDY interrupt + 24-bit SPI read + compare + GPIO write
+n_phase,200,1,,contact times spread over one conversion period
+probe_speed,5,mm/s,assumption,probing feed rate for converting latency to overtravel
+overtravel_max,10e-3,mm,provisional,replace with the ADAM probing requirement
