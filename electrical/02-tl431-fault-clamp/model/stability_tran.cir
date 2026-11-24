@@ -1,0 +1,8 @@
+* TL431 clamp stability: fault current step into the rail at 1 ms
+* Vendor models are included here, not in the .inc files: run_ngspice only resolves top-level includes.
+.include tl431.lib
+.include rail.inc
+Vset ldo_set 0 DC {VSET}
+Ifault 0 rail PWL(0 0 1m 0 {1m + TRISE} {IFAULT})
+.tran 0.2u 4m 0 0.2u
+.end

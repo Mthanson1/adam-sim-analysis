@@ -1,0 +1,20 @@
+name,value,unit,source,note
+tl431_vref_min,2.470,V,TL431 SLVS543 sec 6.9 (TL431AI),25 C; IKA = 10 mA
+tl431_vref_max,2.520,V,TL431 SLVS543 sec 6.9 (TL431AI),25 C
+tl431_vdev,0.050,V,TL431 SLVS543 sec 6.9 (TL431AI),reference deviation over -40 to 85 C (non-SOT23-3 packages)
+tl431_temp_span_full,125,K,TL431 SLVS543 sec 6.9,-40 to 85 C range that tl431_vdev covers
+tl431_ika_max,0.100,A,TL431 SLVS543 sec 6.4,recommended continuous cathode current
+tl431_ika_min,0.001,A,TL431 SLVS543 sec 6.4,minimum for regulation
+tl431_theta_ja,206,K/W,TL431 SLVS543 sec 6.3,DBV (SOT-23-5)
+tj_max,150,C,TL431 SLVS543 sec 6.4,
+ldo_tol_25C,0.02,1,TLV773 SBVS424D sec 5.5,output tolerance at TJ = 25 C (1.8 to 3.3 V outputs)
+ldo_tol_full,0.025,1,TLV773 SBVS424D sec 5.5,TJ = -40 to 85 C
+ldo_tstr,400e-6,s,TLV773 SBVS424D sec 5.6,start-up time max (EN to 95 %)
+ldo_cout_max,40e-6,F,TLV773 SBVS424D sec 5.3,recommended max output capacitance
+ads1220_ain_max_over_avdd,0.3,V,ADS1220 SBAS501D sec 6.1,abs max analog input = AVDD + 0.3 V
+ads1220_avdd,5.0,V,schematic sheet 7,prox ADC AVDD = +5VP
+stm32_vdd_max,3.6,V,STM32G474 datasheet (operating VDD max),verify against the ST datasheet revision in use
+bav199_p_max,0.2,W,schematic sheet 2 note,BAV199 rated power
+r_0603_p,0.1,W,assumption,power rating used for resistors with no package in the parts table
+nmos_rds_on_max,7,ohm,schematic sheet 6 note (2N7002),R_DS(on) max at VGS = 5 V; the MCU drives 3.3 V so the real value is higher
+stm32_gpio_total,0.100,A,STM32G474 datasheet (per user),sum of sink (and source) current across all GPIO
