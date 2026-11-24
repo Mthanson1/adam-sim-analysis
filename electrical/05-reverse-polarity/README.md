@@ -7,7 +7,7 @@
 
 ## Goal
 Check the 24 V input stage (schematic sheet 2): J1 → F1 → SMAJ33CA → Q1 (Si2309CDS high-side
-PMOS, R3 gate pull-down, ZD1 15 V gate clamp) → board +24 V.
+PMOS, R3 gate pull-down, ZD1 15 V gate clamp, **C35 10 nF gate-source**) → board +24 V.
 
 1. **Reversed supply (sim 9):** −24 V plugged in. The supply's rise time is swept from 1 µs
    to 1 ms, because a fast edge couples through Q1's C_rss onto its gate.
@@ -23,7 +23,8 @@ PMOS, R3 gate pull-down, ZD1 15 V gate clamp) → board +24 V.
   - [`model/rev_pol.cir`](model/rev_pol.cir): the input stage, with a 480 Ω load and C1 from
     the parts table. It also includes the two sensor-supply branches (F2/F3 at 2.8 Ω, then
     SMAJ28A to GND), because those TVS diodes forward-conduct if the board rail goes negative.
-  - An optional gate-source capacitor, `CGSEXT`, is in the netlist to test the proposed fix.
+  - C35 (10 nF gate-source, schematic V2) comes from the parts table. The script also runs
+    the reversed cases with C35 set to 1 pF, to show board V1 without it.
 - Q1: Vishay's Si2309CDS model
   ([`shared/spice_models/si2309cds_vishay.lib`](../../shared/spice_models/si2309cds_vishay.lib)).
   It models C_rss as nonlinear, which matters here.
@@ -50,15 +51,18 @@ python electrical/05-reverse-polarity/scripts/run_sims.py
 ## Results
 ![](results/figures/hot_plug.png)
 
-| Reversed supply (−24 V), as built | 1 µs rise | 10 µs | 100 µs | 1 ms | Limit |
+| Reversed supply (−24 V), board V2 with C35 | 1 µs rise | 10 µs | 100 µs | 1 ms | Limit |
 |---|---|---|---|---|---|
-| Board rail minimum | **−3.87 V** | **−3.51 V** | −0.28 V | ~0 | ≥ −0.3 V |
-| | **FAIL** | **FAIL** | PASS (marginal) | PASS | |
-| Q1 \|V_GS\| peak | 5.1 V | 4.7 V | 2.6 V | 0.3 V | ≤ 20 V PASS |
-| Supply current peak | 12.2 A | 9.1 A | 0.19 A | ~0 | info |
-| **With 10 nF gate-source capacitor:** board rail minimum | −0.2 mV | −0.2 mV | −0.2 mV | −0.1 mV | ≥ −0.3 V **PASS** |
+| Board rail minimum | −0.16 mV | −0.16 mV | −0.15 mV | −0.11 mV | ≥ −0.3 V **PASS** |
+| Q1 \|V_GS\| peak | 0.29 V | 0.28 V | 0.27 V | 0.18 V | ≤ 20 V **PASS** |
+| Supply current peak | 20 mA | 2 mA | 0.2 mA | ~0 | info |
+| *Without C35 (board V1):* board rail minimum | −3.87 V | −3.51 V | −0.28 V | ~0 | info |
 
-**A fast reversed hot-plug turns Q1 on.** The drain steps to −24 V, and Q1's gate-drain
+**C35 stops Q1 turning on during a reversed hot-plug.** V_GS stays at about −0.3 V,
+well below the 1 V minimum threshold. The 20 mA peak in the 1 µs case is just C35 and the
+TVS capacitance charging.
+
+**Why C35 is needed (board V1 behaviour).** The drain steps to −24 V, and Q1's gate-drain
 capacitance pulls the gate down with it. R3 (100k) can't hold the gate at 0 V on that time
 scale. V_GS reaches −5 V, which is well past the 1–3 V threshold, so Q1 fully conducts in
 reverse for about 30 µs:
@@ -73,32 +77,36 @@ reverse for about 30 µs:
 V_DS = −30 V. Vishay's model has the real non-linear C_rss, which is several times larger
 near V_DS = 0, exactly where a hot-plug edge starts.
 
-**Fix:** add **10 nF from Q1's gate to its source**, in parallel with ZD1. This capacitor is
+**The fix in V2:** C35, **10 nF from Q1's gate to its source**, in parallel with ZD1. This capacitor is
 much larger than C_rss, so it divides the coupled edge down to −0.28 V, below the threshold.
 The rail then stays at 0 V for every rise time. The cost is a slower forward turn-on
-(R3 × 10 nF ≈ 1 ms). During that millisecond Q1's body diode carries the 50 mA load, which
-is well within its 1.4 A rating. 47 nF also works (−0.06 V), with a 4.7 ms turn-on.
+(R3 × 10 nF ≈ 1 ms time constant). |V_GS| passes 4.5 V, where R_DS(on) is specified, 0.24 ms
+after a fast plug-in. Until then Q1's body diode carries the 50 mA load, well within its 1.4 A
+rating. 47 nF would also work (−0.06 V), with a slower 4.7 ms time constant.
 
 | Forward hot-plug (+24 V) | 1 µs rise | 10 µs | 100 µs | 1 ms | Limit |
 |---|---|---|---|---|---|
-| Inrush peak | 27.1 A | 21.6 A | 5.3 A | 0.70 A | ≤ 8 A |
+| Inrush peak | 27.1 A | 21.6 A | 5.3 A | 0.64 A | ≤ 8 A |
 | | **FAIL** | **FAIL** | PASS | PASS | |
 
-| Forward steady state | Result | Limit | |
+| Forward, with C35 | Result | Limit | |
 |---|---|---|---|
+| Time to \|V_GS\| > 4.5 V after a 1 µs plug-in | 0.24 ms | n/a | info |
 | Q1 drop at 50 mA | 16.4 mV | n/a | info |
 | Q1 \|V_GS\| (ZD1 clamped) | 14.9 V | ≤ 20 V | **PASS** |
 
 With an ideal fast-rising supply, only F1's 0.8 Ω limits the inrush into C1, and the peak
 exceeds Q1's 8 A pulsed rating. The current flows through Q1's body diode before the channel
-turns on, so the gate capacitor does not change it. In a real plug-in, cable inductance and
+turns on, so C35 does not change it. In a real plug-in, cable inductance and
 the supply's own output impedance stretch the edge. A ≥ 70 µs edge keeps the peak under 8 A.
 
 ## Conclusions
-- **Reverse polarity is blocked in steady state** (leakage ≤ 1 µA). **A fast reversed hot-plug
-  is not blocked:** Q1 turns on through its C_rss and drives the board rail to about −4 V.
-  **Add 10 nF gate-source to Q1.** It removes the problem at every rise time, at the cost of a
-  1 ms forward turn-on.
+- **Reverse polarity is blocked, including fast reversed hot-plug, with C35 fitted (V2).**
+  The board rail stays within 0.2 mV of ground for every rise time, and steady leakage is
+  ≤ 1 µA. Without C35 (V1), a fast reversed edge turns Q1 on and drives the rail to about
+  −4 V.
+- C35 still needs a footprint in the schematic. Use 0603 rated ≥ 25 V; it only sees V_GS,
+  which ZD1 clamps at 15 V.
 - Hot-plugging a stiff 24 V supply into the 22 µF C1 can exceed Q1's pulsed rating if the edge
   is faster than about 70 µs. Options:
   - Measure the real plug-in edge with the intended supply and cable.

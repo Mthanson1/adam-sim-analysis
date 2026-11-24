@@ -13,8 +13,8 @@ R3 g 0 {R3}
 DZ1 g vout DZ15
 C1 vout 0 {C1}
 Rload vout 0 {RLOAD}
-* Optional gate-source capacitor (proposed fix); CGSEXT = 1 pF is effectively absent.
-Cgsext g vout {CGSEXT}
+* C35: gate-source capacitor (board V2). The script sets it to 1 pF to model V1 without it.
+C35 g vout {C35}
 * Sensor supplies (sheets 4/5): F2/F3 (2.8 ohm initial) into SMAJ28A, anode on GND. They
 * forward-conduct if the board rail goes negative.
 RF2 vout s0 2.8

@@ -3,8 +3,9 @@
     python electrical/05-reverse-polarity/scripts/run_sims.py
 
 The supply ramps from 0 to +/-24 V over a range of rise times, because a fast edge couples
-through Q1's Crss onto its gate. The reversed case is run as built and with the proposed
-gate-source capacitor. Writes results/summary_sims.csv and figures.
+through Q1's Crss onto its gate. The board (V2) has C35 = 10 nF gate-source to stop that; the
+reversed case is also run without C35 (board V1) for comparison. Writes
+results/summary_sims.csv and figures.
 """
 import sys
 
@@ -20,10 +21,11 @@ T_START = 100e-6
 RISE_TIMES = (1e-6, 10e-6, 100e-6, 1e-3)
 
 
-def hot_plug(v_in, t_rise, c_gs=CRIT["cgs_ext_none"]):
-    raw = run_ngspice(P["model"] / "rev_pol.cir", P["results"], name="rev_pol",
-                      params={"VIN": v_in, "TRISE": t_rise, "RLOAD": CRIT["rload"],
-                              "CGSEXT": c_gs})
+def hot_plug(v_in, t_rise, without_c35=False):
+    params = {"VIN": v_in, "TRISE": t_rise, "RLOAD": CRIT["rload"]}
+    if without_c35:
+        params["C35"] = CRIT["c35_absent"]
+    raw = run_ngspice(P["model"] / "rev_pol.cir", P["results"], name="rev_pol", params=params)
     t = np.real(trace(raw, "time"))
     v_out = np.real(trace(raw, "v(vout)"))
     return {
@@ -35,17 +37,17 @@ def hot_plug(v_in, t_rise, c_gs=CRIT["cgs_ext_none"]):
     }
 
 
-def plot(reverse, reverse_fix, forward):
+def plot(reverse, reverse_v1, forward):
     fig, axes = plt.subplots(3, 1, figsize=(7, 9), sharex=True)
     for t_rise, r in reverse.items():
         label = f"{t_rise * 1e6:g} µs"
         axes[0].plot((r["t"] - T_START) * 1e6, r["v_out"], label=label)
         axes[1].plot((r["t"] - T_START) * 1e6, r["v_gs"], label=label)
-    fast = min(reverse_fix)
-    r = reverse_fix[fast]
-    fix_label = f"{fast * 1e6:g} µs + {CRIT['cgs_ext_proposed'] * 1e9:g} nF C_GS"
-    axes[0].plot((r["t"] - T_START) * 1e6, r["v_out"], "k--", label=fix_label)
-    axes[1].plot((r["t"] - T_START) * 1e6, r["v_gs"], "k--", label=fix_label)
+    fast = min(reverse_v1)
+    r = reverse_v1[fast]
+    v1_label = f"{fast * 1e6:g} µs, without C35 (V1)"
+    axes[0].plot((r["t"] - T_START) * 1e6, r["v_out"], "k--", label=v1_label)
+    axes[1].plot((r["t"] - T_START) * 1e6, r["v_gs"], "k--", label=v1_label)
     for t_rise, r in forward.items():
         axes[2].plot((r["t"] - T_START) * 1e6, r["i_in"], label=f"{t_rise * 1e6:g} µs")
     axes[0].set_ylabel("Board +24 V rail [V]\n(-24 V plugged in)")
@@ -62,9 +64,9 @@ def plot(reverse, reverse_fix, forward):
 def main():
     apply_style()
     reverse = {tr: hot_plug(-CRIT["v_in"], tr) for tr in RISE_TIMES}
-    reverse_fix = {tr: hot_plug(-CRIT["v_in"], tr, CRIT["cgs_ext_proposed"]) for tr in RISE_TIMES}
+    reverse_v1 = {tr: hot_plug(-CRIT["v_in"], tr, without_c35=True) for tr in RISE_TIMES}
     forward = {tr: hot_plug(CRIT["v_in"], tr) for tr in RISE_TIMES}
-    plot(reverse, reverse_fix, forward)
+    plot(reverse, reverse_v1, forward)
 
     rows = []
     for tr, r in reverse.items():
@@ -74,15 +76,19 @@ def main():
             check(f"Q1 |V_GS| max ({tag})", np.abs(r["v_gs"]).max(), "V", max=CRIT["vgs_max"]),
             check(f"Supply current peak ({tag})", np.abs(r["i_in"]).max(), "A"),
         ]
-    fix_nf = CRIT["cgs_ext_proposed"] * 1e9
-    for tr, r in reverse_fix.items():
-        rows.append(check(f"Board rail min (reverse, {tr * 1e6:g} us, {fix_nf:g} nF C_GS)",
-                          r["v_out"].min(), "V", min=CRIT["vout_min"]))
+    for tr, r in reverse_v1.items():
+        rows.append(check(f"Board rail min (reverse, {tr * 1e6:g} us, without C35)",
+                          r["v_out"].min(), "V"))
     rows.append(check("Reverse leakage, Q1 IDSS (datasheet max)", CRIT["idss_max"] * 1e6, "uA"))
     for tr, r in forward.items():
         rows.append(check(f"Inrush peak (forward, {tr * 1e6:g} us rise)", r["i_in"].max(), "A",
                           max=CRIT["q1_idm"]))
     steady = forward[RISE_TIMES[-1]]
+    fast = forward[RISE_TIMES[0]]
+    on = np.abs(fast["v_gs"]) >= CRIT["vgs_on"]
+    t_on = fast["t"][np.argmax(on)] - T_START if on.any() else np.nan
+    rows.append(check(f"Forward: time to |V_GS| > {CRIT['vgs_on']:g} V (1 us plug-in)",
+                      t_on * 1e3, "ms"))
     rows += [
         check("Forward: Q1 drop at load current", steady["v_ds"][-1] * 1e3, "mV"),
         check("Forward: Q1 |V_GS| (zener clamped)", np.abs(steady["v_gs"][-1]), "V",

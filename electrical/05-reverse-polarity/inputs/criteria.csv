@@ -5,5 +5,5 @@ vout_min,-0.3,V,assumption,most ICs allow -0.3 V below ground on supply pins; ve
 vgs_max,20,V,Si2309CDS datasheet abs max,|VGS|
 idss_max,1e-6,A,Si2309CDS datasheet,VDS = -60 V at 25 C (10 uA at 55 C)
 q1_idm,8,A,Si2309CDS datasheet abs max,pulsed drain current (10 us pulse)
-cgs_ext_proposed,10e-9,F,proposal (study 05),gate-source capacitor to swamp Q1's Crss during reverse hot-plug
-cgs_ext_none,1e-12,F,,stand-in for no gate-source capacitor (as built)
+c35_absent,1e-12,F,,stand-in for board V1 without C35
+vgs_on,4.5,V,Si2309CDS datasheet,lowest VGS with a specified RDS(on) (0.45 ohm max)
