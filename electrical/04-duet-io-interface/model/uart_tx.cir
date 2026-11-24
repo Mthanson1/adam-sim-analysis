@@ -1,0 +1,14 @@
+* UART TX: MCU pin (40 ohm) -> clamp node (BAV199 pair) -> R29 -> cable -> Duet input.
+* One low bit then idle high, bit time TBIT.
+.include bav199.lib
+.include duet_input.inc
+Vmcu pin 0 PULSE(3.3 0 2u 2n 2n {TBIT} {4*TBIT})
+Rpin pin node 40
+Vrail rail 0 3.3
+D13ah node rail BAV199
+D13al 0 node BAV199
+R29 node ext {R29}
+Ccab ext 0 {CCABLE}
+Xin ext in duet_input
+.tran 5n 30u 0 5n
+.end
