@@ -37,7 +37,9 @@ C1,22e-6,F,20,,60,,,24V bulk,
 C3,2.2e-6,F,10,,50,,,buck input,X7R
 C4,22e-6,F,20,,,,,buck output,
 C5,1e-6,F,10,,,,,LDO input,
-C6,1e-6,F,10,,,,,LDO output / +3V3 bulk,TL431 note asks for 6.21 uF on +3V3; see study 02
+C6,1e-6,F,10,,,,,LDO output / +3V3 bulk,"part of the 6.21 uF total on +3V3 (C6, C7, C18, C20-C24)"
+C7,100e-9,F,10,,,,,load cell ADC DVDD decoupling,on +3V3
+C24,100e-9,F,10,,,,,prox ADC DVDD decoupling,on +3V3
 C10,10e-9,F,2,,,,,load cell Ccm +,C0G
 C11,10e-9,F,2,,,,,load cell Ccm -,C0G
 C12,100e-9,F,10,,,,,load cell Cdiff,tolerance assumed

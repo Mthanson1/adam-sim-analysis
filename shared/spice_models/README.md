@@ -13,6 +13,8 @@ behavioral stand-in for those, and say so in the study README.
 | File | Part | Vendor | Source | Downloaded | Notes |
 |------|------|--------|--------|------------|-------|
 | `rc_lowpass.cir` | (self-test) | n/a | n/a | n/a | Used by `selftest.py` |
+| `tl431.lib` | TL431 (subckt `TL431 K A REF`) | Texas Instruments | [SLVM071B](https://www.ti.com/lit/zip/slvm071) (`TL431.lib` from the zip, unmodified apart from line endings) | 2026-11-24 | Unencrypted PSpice transient + AC model, TI "as is" terms in the file header |
+| `bav199.lib` | BAV199 (model `BAV199`, one junction) | **fitted, not vendor** | Nexperia BAV199 datasheet max Vf points | 2026-11-24 | Nexperia's SPICE download blocks automated access; see the file header for the fit |
 
 ## Self-test
 
