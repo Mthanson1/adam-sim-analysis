@@ -1,0 +1,6 @@
+* RC low-pass self-test; Rt and Ct come from selftest.py
+V1 in 0 DC 0 AC 1
+R1 in out {Rt}
+C1 out 0 {Ct}
+.ac dec 200 10 1meg
+.end

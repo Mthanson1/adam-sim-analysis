@@ -1,0 +1,29 @@
+* 2N7002 small-signal NMOS, Level 1 fit. NOT a vendor model (vendor downloads block
+* automated access). Fitted to onsemi 2N7000/2N7002/NDS7002A datasheet (Rev. 2N7002 rows):
+*   VGS(th) 2.1 V typ / 2.5 V max (ID = 250 uA)
+*   RDS(on) 1.7 ohm typ / 7.5 ohm max at VGS = 5 V, ID = 50 mA
+*   Ciss 20 pF, Coss 11 pF, Crss 4 pF typ (VDS = 25 V)
+* Level 1 with W = L = 1: RDS(on) = 1 / (KP * (VGS - VTO)) in the linear region, so
+*   typ:   KP = 1 / (1.7 * (5 - 2.1)) = 0.203 A/V^2, VTO = 2.1
+*   worst: KP = 1 / (7.5 * (5 - 2.5)) = 0.0533 A/V^2, VTO = 2.5
+* At the 3.3 V gate drive from the MCU this gives about 4 ohm (typ) and 23 ohm (worst).
+* Capacitances are fixed (no voltage dependence): Cgd = Crss, Cgs = Ciss - Crss, Cds = Coss - Crss.
+* Pins: D G S
+.subckt N2N7002 d g s
+M1 d g s s NM_TYP
+Cgs g s 16p
+Cgd g d 4p
+Cds d s 7p
+Dbody s d DBODY
+.ends N2N7002
+.subckt N2N7002_WORST d g s
+M1 d g s s NM_WORST
+Cgs g s 16p
+Cgd g d 4p
+Cds d s 7p
+Dbody s d DBODY
+.ends N2N7002_WORST
+.model NM_TYP NMOS(LEVEL=1 VTO=2.1 KP=0.203 LAMBDA=0.01)
+.model NM_WORST NMOS(LEVEL=1 VTO=2.5 KP=0.0533 LAMBDA=0.01)
+* Body diode: 0.88 V typ at the 115 mA rated diode current (datasheet VSD)
+.model DBODY D(IS=1e-12 N=1.6 RS=0.5 BV=60)
