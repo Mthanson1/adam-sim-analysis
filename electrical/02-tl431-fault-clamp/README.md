@@ -35,8 +35,8 @@ hand-calc budget. This study checks:
     [`powerup.cir`](model/powerup.cir).
 - Vendor models: [`shared/spice_models/`](../../shared/spice_models/README.md).
   - TL431: TI's unencrypted PSpice model.
-  - BAV199: **fitted to the datasheet's max Vf**, not a vendor model. Nexperia's download
-    blocks automated access.
+  - BAV199: Nexperia's model (0.89 V at 10 mA). An earlier datasheet-max fit gave node
+    voltages about 0.11 V higher; the verdicts did not change.
 - Rail capacitance: C6 + C7 + C18 + C20–C24 = **15.21 µF nominal** (schematic V2, C6 = 10 µF).
   Every rail sim uses **10.04 µF effective**, applying the sheet 2 DC-bias note
   (~10 µF of 15.2 µF, factor 0.66). Device data and assumptions:
@@ -70,14 +70,14 @@ Both print a pass/fail table, write `results/summary_*.csv`, and exit non-zero o
 
 | At 24 V fault (28.8 V) | Result | Limit | |
 |---|---|---|---|
-| Total clamp current | 33.0 mA (41.8 mA) | n/a | info (hand calc 34.1 mA) |
-| TL431 cathode current | 30.6 mA (39.4 mA) | ≤ 100 mA | **PASS** |
+| Total clamp current | 33.3 mA (42.0 mA) | n/a | info (hand calc 34.1 mA) |
+| TL431 cathode current | 30.9 mA (39.7 mA) | ≤ 100 mA | **PASS** |
 | +3V3 rail | 3.512 V (3.515 V) | ≤ 3.6 V | **PASS** |
-| Prox clamp node | 4.33 V (4.39 V) | ≤ 5.3 V | **PASS** |
-| UART TX / RX clamp node | 4.57 / 4.47 V | n/a | info (hand calc ≤ 4.58 V) |
+| Prox clamp node | 4.22 V (4.27 V) | ≤ 5.3 V | **PASS** |
+| UART TX / RX clamp node | 4.46 / 4.36 V | n/a | info (hand calc ≤ 4.58 V) |
 
-UART TX carries almost all the fault current (28.6 mA through R29). The prox legs carry
-almost none: the divider holds their node near the clamp voltage (0.1 mA, versus 0.26 mA in
+UART TX carries almost all the fault current (28.7 mA through R29). The prox legs carry
+almost none: the divider holds their node near the clamp voltage (0.17 mA, versus 0.26 mA in
 the hand calc).
 
 ![](results/figures/clamp_stability.png)
@@ -120,11 +120,11 @@ bench. Raising R7 to 4.12 kΩ would remove the overlap.
 
 | Fault power (24 V / 28.8 V) | Power | Rating | |
 |---|---|---|---|
-| R29 UART TX, 2512 | 555 / 862 mW | 1 W | PASS (86 % at 28.8 V) |
-| R31 UART RX, 0805 | 81 / 126 mW | 125 mW | PASS / **FAIL** (101 %) |
+| R29 UART TX, 2512 | 562 / 870 mW | 1 W | PASS (87 % at 28.8 V) |
+| R31 UART RX, 0805 | 82 / 127 mW | 125 mW | PASS / **FAIL** (102 %) |
 | R13 prox divider top | 51 / 76 mW | 100 mW (assumed 0603) | PASS |
-| TL431 | 108 / 138 mW | 388 mW (θJA 206 K/W, 70 °C) | PASS |
-| BAV199DW, both UART diodes | 34 / 43 mW | 200 mW | PASS |
+| TL431 | 109 / 139 mW | 388 mW (θJA 206 K/W, 70 °C) | PASS |
+| BAV199DW, both UART diodes | 31 / 39 mW | 200 mW | PASS |
 | R30/R32 open drain, FET on | 1190 / 1713 mW | 100 mW (assumed 0603) | **FAIL** |
 | 2N7002 | 18 / 26 mW | 225 mW | PASS |
 
@@ -147,7 +147,7 @@ likely exceeds it, so check that row of the STM32G474 datasheet.
 - **Clamp stability is fixed in V2.** C6 = 10 µF gives 10 µF effective, against an 8 µF
   stability boundary (V1 at 6.21 µF oscillated). Confirm the DC-bias derating of the
   parts you order.
-- R31 is at its 0805 rating at 28.8 V. Use 1206 for margin. R29 has 14 % margin at 28.8 V.
+- R31 is at its 0805 rating at 28.8 V. Use 1206 for margin. R29 has 13 % margin at 28.8 V.
 - The LDO/TL431 margin is fine in the lab. Raise R7 to 4.12 kΩ if the board ever has to
   work across the full temperature range.
-- Next steps: replace the fitted BAV199 with the Nexperia model, and check the STM32 pin limits.
+- Next step: check the STM32 per-pin current limit against the 33 mA TX-low fault case.

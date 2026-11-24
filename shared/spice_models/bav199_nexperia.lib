@@ -1,0 +1,42 @@
+***********************************************************
+*
+* BAV199
+*
+* Nexperia
+*
+* Low-leakage double diode
+* IFmax = 160mA
+* VRmax = 75V
+* VFmax = 1,25V  @ IF = 150mA
+* IRmax = 5nA    @ VR = 75V
+*
+*
+* Package pinning does not match Spice model pinning.
+* Package: SOT23
+* 
+* Package Pin 1: Anode   D1
+* Package Pin 2: Cathode D2
+* Package Pin 3: Cathode D1; Anode D2
+*
+*
+*
+* Extraction date (week/year): #
+* Simulator: PSPICE
+*
+***********************************************************
+*
+.MODEL BAV199 D
++ IS=805.84E-18
++ N=1.0246
++ RS=50.000E-3
++ IKF=362.16E-6
++ CJO=1.9002E-12
++ M=.35193
++ VJ=1.2722
++ ISR=298.95E-15
++ BV=113.30
++ IBV=10
++ TT=1.0230E-6
+* ADAM edit: stray .ENDS (no matching .SUBCKT) commented out; ngspice rejects it.
+*.ENDS
+*
