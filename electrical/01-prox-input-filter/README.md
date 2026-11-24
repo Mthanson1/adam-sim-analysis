@@ -50,8 +50,9 @@ Check the inductive-proximity sensor channel on the ADAM Calibration Board V2 (s
 - **The real sensor's curve has the same shape as the datasheet's FE360 curve, scaled to its
   measured 10.35 V saturation.** The sweep data (device-monitor-261115-185349) shows the scale
   but not the distance axis, because steps/mm is not in hand. The closest point in the sweep,
-  6.7 V, maps to about 3.9 mm on the scaled curve. A different target material changes the
-  slope a lot; copper and aluminium saturate by 2.2 mm.
+  6.7 V, maps to about 3.9 mm on the scaled curve. **The target is H2 tool steel.** It is
+  ferromagnetic like FE360, so the FE360 curve is the right stand-in. Non-ferrous targets would
+  change the slope a lot; copper and aluminium saturate by 2.2 mm.
 - Divider resistors are either the standard 1 % thick film at 100 ppm/K, or the 0.1 %
   precision option at 25 ppm/K (typical thin film, assumed). Neither assumes tracking. The lab
   temperature changes by ±10 K between calibration and use.
@@ -132,7 +133,6 @@ warm, could clip. With 0.1 % resistors the clipping point is 10.55 V.
 - Next steps:
   - Get steps/mm for the sweep rig, so the measured flank (about 27.6 mV/step) can replace
     the scaled datasheet curve.
-  - Confirm the target material.
   - The repeatability plot shows the fitted minimum shifting about 5 steps over sweeps 3–5,
     and the ADS1220 and the STM32 ADC agree on the shift. So the shift comes from the sensor
     or the mechanics, not the ADC channel.
