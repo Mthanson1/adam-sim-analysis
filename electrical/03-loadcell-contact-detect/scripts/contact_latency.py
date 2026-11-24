@@ -16,6 +16,7 @@ from math import erfc, sqrt
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.signal import fftconvolve
 
 from adam_common import apply_style, check, load_specs, save_figure, study_paths, write_summary
 from adam_common.spice import run_ngspice, trace
@@ -59,7 +60,7 @@ def force_profile(t, t0, rate):
 
 def detect(t, force, step_resp, threshold):
     """Analog-filtered force, ADC outputs (times, values) and the detection time (s)."""
-    analog = np.convolve(np.diff(force, prepend=0.0), step_resp)[: len(t)]
+    analog = fftconvolve(np.diff(force, prepend=0.0), step_resp)[: len(t)]
     per_conv = int(round(T_CONV / DT))
     n_conv = len(t) // per_conv
     adc = analog[: n_conv * per_conv].reshape(n_conv, per_conv).mean(axis=1)
@@ -111,7 +112,9 @@ def main():
     sigma_g = ADS["noise_rms_g128_t2000"] * grams_per_volt()
     threshold = CRIT["threshold_sigma"] * sigma_g
 
-    t = np.arange(0, 12 * T_CONV, DT)
+    # Long enough for the slowest ramp to reach threshold, plus filter and conversion delay.
+    t_needed = threshold / (min(RAMP_RATES) * 1e3) + 8 * T_CONV
+    t = np.arange(0, t_needed, DT)
     step_resp = analog_step_response(len(t))
     plot_example(t, step_resp, threshold)
 

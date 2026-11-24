@@ -35,9 +35,9 @@ to drive Z_CONTACT? This study checks:
   4. The contact instant is swept across one conversion period (200 phases).
 
 ## Assumptions
-- **The load cell is 2 mV/V and 1000 g capacity, excited at 5 V (10 mV full scale).** These
-  are placeholders until the real load cell is chosen. Force noise, threshold and resolution
-  all scale as capacity / (mV/V).
+- **The load cell is the planned FRC4115: 5 kg capacity, 1 mV/V rated output.** Excited at
+  5 V, that is 5 mV full scale, inside the ±16 mV range at gain 128. Force noise, threshold
+  and resolution all scale as capacity / (mV/V).
 - The bridge output resistance is 1 kΩ.
 - The noise is white and Gaussian, with samples independent. The datasheet table uses the
   internal 2.048 V reference. TI states that input-referred noise "only changes marginally"
@@ -68,23 +68,23 @@ The corner is 505 Hz, not the 531 Hz hand calc, because the hand calc leaves out
 
 ![](results/figures/contact_timeline.png)
 
-| Detection (assumed 2 mV/V, 1 kg) | Result | |
+| Detection (FRC4115, 5 kg, 1 mV/V) | Result | |
 |---|---|---|
-| Force noise (rms) / noise-free resolution (pk-pk) | 0.082 g / 0.58 g | info |
-| 6σ trigger threshold | 0.49 g | info |
+| Force noise (rms) / noise-free resolution (pk-pk) | 0.82 g / 5.8 g | info |
+| 6σ trigger threshold | 4.9 g | info |
 | Mean time between false triggers at 6σ | 142 h | info |
 
 ![](results/figures/contact_latency.png)
 
 | Contact profile | Latency mean / max | Overtravel at 5 mm/s, max | ≤ 10 µm |
 |---|---|---|---|
-| Step to 50 g | 0.33 / 0.58 ms | 2.9 µm | **PASS** |
-| 100 g/ms ramp | 0.45 / 0.70 ms | 3.5 µm | **PASS** |
-| 10 g/ms ramp | 0.67 / 0.92 ms | 4.6 µm | **PASS** |
-| 1 g/ms ramp | 1.30 / 1.56 ms | 7.8 µm | **PASS** |
+| Step to 50 g | 0.47 / 0.72 ms | 3.6 µm | **PASS** |
+| 100 g/ms ramp | 0.67 / 0.92 ms | 4.6 µm | **PASS** |
+| 10 g/ms ramp | 1.30 / 1.56 ms | 7.8 µm | **PASS** |
+| 1 g/ms ramp | 5.76 / 6.01 ms | **30.1 µm** | **FAIL** |
 
 Latency comes from three parts:
-- the time for the force itself to reach the threshold (0.49 ms at 1 g/ms)
+- the time for the force itself to reach the threshold (4.9 ms at 1 g/ms)
 - the analog filter delay (~0.3 ms)
 - waiting for the conversion window to finish (0–0.5 ms, depending on phase)
 
@@ -94,10 +94,17 @@ are detected in under 0.6 ms. Soft contacts are limited by the threshold, not th
 ## Conclusions
 - The analog filter passes anti-aliasing at turbo speed with 10 dB of margin. It adds about
   0.3 ms of delay.
-- With the placeholder load cell, a 6σ threshold sits at 0.5 g. That gives one false trigger
-  per ~140 h at 2000 SPS, and worst-case overtravel stays under 8 µm at 5 mm/s.
-- The firmware can trade false-trigger rate for latency. Requiring two consecutive samples
-  over a lower threshold (e.g. 4.5σ) cuts false triggers to almost nothing and costs up to
-  one extra conversion (0.5 ms).
-- Next steps: put in the real load cell's mV/V and capacity, plus the ADAM overtravel
-  requirement, then rerun. Every number above scales linearly with capacity / (mV/V).
+- With the FRC4115 (5 kg, 1 mV/V), a 6σ threshold sits at 4.9 g. That gives one false
+  trigger per ~140 h at 2000 SPS. Stiff contacts (≥ 10 g/ms) stay within 10 µm of
+  overtravel at 5 mm/s. **Soft contacts (1 g/ms) take about 6 ms and overtravel about
+  30 µm**, because the force itself needs 4.9 ms to reach the threshold.
+- A 5 kg cell spends most of its range unused in probing. Two ways to bring the threshold
+  down, starting with the firmware option:
+  - **Firmware:** require two consecutive samples over 4.5σ (3.7 g). Two independent samples
+    over 4.5σ are about as rare as one over 6σ, so false triggers drop to almost nothing, but
+    detection costs up to one extra conversion (0.5 ms).
+  - **Hardware:** a lower-capacity or higher-output cell (e.g. 1 kg, 2 mV/V) lowers the
+    threshold 10× directly.
+- Next steps: set the ADAM overtravel requirement (10 µm is provisional) and measure the
+  real contact stiffness × probing speed (the g/ms ramp). Every number above scales
+  linearly with capacity / (mV/V).
