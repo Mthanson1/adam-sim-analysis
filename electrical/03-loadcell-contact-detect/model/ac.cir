@@ -1,0 +1,6 @@
+* Load cell filter AC response (differential)
+.include loadcell_filter.inc
+Vd vd 0 DC 0 AC 1
+X1 vd p n loadcell_filter
+.ac dec 100 1 10meg
+.end

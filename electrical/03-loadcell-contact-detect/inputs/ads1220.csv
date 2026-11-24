@@ -1,0 +1,7 @@
+name,value,unit,source,note
+f_clk,4.096e6,Hz,ADS1220 SBAS501D sec 8.3.7,internal oscillator nominal
+conv_clk_turbo_2000,2072,tCLK,ADS1220 SBAS501D Table 8-4 p30,continuous conversion; 505.9 us
+bw_turbo_2000,967.6,Hz,ADS1220 SBAS501D Table 8-4 p30,digital filter -3 dB bandwidth
+noise_rms_g128_t2000,0.82e-6,V,ADS1220 SBAS501D Table 7-5 p17,turbo 2000 SPS gain 128 internal 2.048 V ref; noise changes only marginally with an external reference
+noise_pp_g128_t2000,5.81e-6,V,ADS1220 SBAS501D Table 7-5 p17,same conditions
+f_mod_turbo,512000,Hz,ADS1220 SBAS501D sec 6.6 note,turbo mode modulator frequency
