@@ -119,7 +119,7 @@ the worst-case ADC clipping point of 10.40 V. A unit that saturates a little hig
 warm, could clip. With 0.1 % resistors the clipping point is 10.55 V.
 
 ## Conclusions
-- Anti-aliasing passes with 7 dB of margin across tolerances.
+- Anti-aliasing passes with 8 dB of margin across tolerances.
 - CM rejection at the buck frequency fails the analog-only criterion by about 10 dB, because the
   source impedance is unbalanced. **Recommended fix:** set R26 and R28 to 2.43 kΩ, and confirm
   on hardware by measuring with the buck running.
