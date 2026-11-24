@@ -37,8 +37,9 @@ hand-calc budget. This study checks:
   - TL431: TI's unencrypted PSpice model.
   - BAV199: **fitted to the datasheet's max Vf**, not a vendor model. Nexperia's download
     blocks automated access.
-- Nominal rail capacitance: C6 + C7 + C18 + C20–C24 = **6.21 µF** (the schematic's
-  "C_OUT on +3V3" note). Device data and assumptions:
+- Rail capacitance: C6 + C7 + C18 + C20–C24 = **15.21 µF nominal** (schematic V2, C6 = 10 µF).
+  Every rail sim uses **10.04 µF effective**, applying the sheet 2 DC-bias note
+  (~10 µF of 15.2 µF, factor 0.66). Device data and assumptions:
   [`inputs/devices.csv`](inputs/devices.csv), [`inputs/criteria.csv`](inputs/criteria.csv).
 
 ## Assumptions
@@ -81,20 +82,24 @@ the hand calc).
 
 ![](results/figures/clamp_stability.png)
 
-| Stability | Result | Limit | |
+| Stability (schematic V2, C6 = 10 µF) | Result | Limit | |
 |---|---|---|---|
-| Sustained ripple at 6.21 µF, 33 mA | **38 mV pk-pk at ~21 kHz** | ≤ 1 mV | **FAIL** |
+| Worst sustained ripple at 10.04 µF effective, 5–33 mA | < 0.001 mV | ≤ 1 mV | **PASS** |
+| Worst sustained ripple at 15.21 µF nominal | < 0.001 mV | ≤ 1 mV | **PASS** |
 | Smallest effective C stable at every current | 8 µF | n/a | info |
+| Effective C / smallest stable C | 1.26× | ≥ 1 | **PASS** |
 
-**With the TI model, the clamp oscillates at the board's nominal 6.21 µF.** This matches the
-unstable region on the TL431 datasheet stability chart (pasted on sheet 2). It is not a
-numerical artifact: a 10× finer timestep gives the same 39.6 mV. The rail still stays below
-3.6 V while it oscillates, so the MCU is not over-volted. But a clamp that is oscillating
-during a fault is not doing its job cleanly. Two things stabilize it:
-- **≥ 8 µF effective** capacitance. Ceramics lose capacitance under DC bias, so aim for
-  ≥ 10 µF effective. For example, change C6 from 1 µF to 10 µF (15.2 µF nominal total). Check
-  the chosen part's DC-bias curve, and stay under the TLV773's 40 µF maximum.
-- Or **~0.2 Ω of ESR** in the bulk capacitor. A sweep at 6.21 µF and 0.2 Ω showed no ringing.
+**Board V1 (C6 = 1 µF, 6.21 µF total) oscillated.** With the TI model it showed 38 mV pk-pk
+at ~21 kHz, matching the unstable region on the TL431 datasheet chart pasted on sheet 2.
+A 10× finer timestep gave the same amplitude, so it was not a numerical artifact. The V1
+waveform is kept in the figure for comparison.
+
+V2 raises C6 to 10 µF. The rail has about 10 µF left after DC bias, which is stable with
+1.26× margin over the 8 µF boundary. That margin depends on the DC-bias factor. If the chosen
+C6 and C23 parts lose more than about 47 % at 3.5 V, the rail drops below 8 µF. Check the
+DC-bias curves of the parts actually ordered. The 15.21 µF nominal is within the TLV773's
+40 µF maximum. About 0.2 Ω of ESR in the bulk capacitor would also stabilize the clamp, if
+more margin is ever needed.
 
 ![](results/figures/powerup.png)
 
@@ -132,13 +137,16 @@ larger part, or a PTC, would make the open-drain outputs survive a fault instead
 (rated 225 mW), with R30 at 180 mW. So with worst-case parts, R30 is not guaranteed to fail first.
 
 If the MCU happens to be driving TX low when the fault hits, about **33 mA** flows into the
-STM32 pin through R29 (24 V / 720 Ω). Check that against the STM32G474 I/O current limit.
+STM32 pin through R29 (24 V / 720 Ω). That is within the 100 mA total for all GPIO combined
+(**PASS**). STM32 parts also have a per-pin limit, which is not in the inputs yet. 33 mA
+likely exceeds it, so check that row of the STM32G474 datasheet.
 
 ## Conclusions
 - The DC clamp works as designed: the rail holds at 3.51 V up to 30 V, with 3× margin on
   TL431 current.
-- **The clamp is unstable at the nominal 6.21 µF.** Raise the effective rail capacitance to
-  ≥ 10 µF, for example C6 → 10 µF. This is the most important change from this study.
+- **Clamp stability is fixed in V2.** C6 = 10 µF gives 10 µF effective, against an 8 µF
+  stability boundary (V1 at 6.21 µF oscillated). Confirm the DC-bias derating of the
+  parts you order.
 - R31 is at its 0805 rating at 28.8 V. Use 1206 for margin. R29 has 14 % margin at 28.8 V.
 - The LDO/TL431 margin is fine in the lab. Raise R7 to 4.12 kΩ if the board ever has to
   work across the full temperature range.

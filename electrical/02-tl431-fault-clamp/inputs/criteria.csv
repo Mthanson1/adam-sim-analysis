@@ -9,3 +9,4 @@ temp_span_lab,10,K,assumption,lab temperature excursion from 25 C
 trise,1e-6,s,assumption,fault current rise time
 t_ambient,70,C,assumption,ambient for ratings (thick-film resistor ratings are specified at 70 C)
 r_mcu_pin,40,ohm,assumption,STM32 output driver resistance when USART1_TX drives low
+c_dc_bias_factor,0.66,1,schematic sheet 2 note,effective / nominal +3V3 capacitance after DC bias (~10 uF of 15.2 uF)

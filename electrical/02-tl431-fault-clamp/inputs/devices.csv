@@ -17,3 +17,4 @@ stm32_vdd_max,3.6,V,STM32G474 datasheet (operating VDD max),verify against the S
 bav199_p_max,0.2,W,schematic sheet 2 note,BAV199 rated power
 r_0603_p,0.1,W,assumption,power rating used for resistors with no package in the parts table
 nmos_rds_on_max,7,ohm,schematic sheet 6 note (2N7002),R_DS(on) max at VGS = 5 V; the MCU drives 3.3 V so the real value is higher
+stm32_gpio_total,0.100,A,STM32G474 datasheet (per user),sum of sink (and source) current across all GPIO

@@ -90,7 +90,9 @@ def main():
         rows += [check(f"{name} at {v_fault:g} V", p * 1e3, "mW", max=rating * 1e3)
                  for name, p, rating in table]
     i_tx_low = CRIT["v_fault"] / (PARTS["R29"]["value"] + CRIT["r_mcu_pin"])
-    rows.append(check("STM32 TX pin current if driving low at 24 V", i_tx_low * 1e3, "mA"))
+    # Per-pin limit not checked here (not in inputs); this is the sum-of-all-GPIO limit.
+    rows.append(check("STM32 TX pin current if driving low at 24 V", i_tx_low * 1e3, "mA",
+                      max=DEV["stm32_gpio_total"] * 1e3))
     if not write_summary(rows, P["results"] / "summary_thermal.csv"):
         sys.exit(1)
 

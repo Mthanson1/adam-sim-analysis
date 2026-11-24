@@ -29,12 +29,15 @@ PARTS = load_parts()
 
 RAIL_CAPS = ("C6", "C7", "C18", "C20", "C21", "C22", "C23", "C24")
 C_RAIL_NOM = sum(PARTS[ref]["value"] for ref in RAIL_CAPS)
+# Ceramics lose capacitance under DC bias; every rail sim uses the effective value.
+C_RAIL_EFF = C_RAIL_NOM * CRIT["c_dc_bias_factor"]
+C_RAIL_V1 = 6.21e-6  # board V1 total (C6 = 1 uF), kept for comparison
 C_SWEEP = np.array([1, 3, 4.5, 6.21, 8, 9, 10, 12, 15, 22]) * 1e-6
 I_SWEEP = np.array([5, 10, 20]) * 1e-3  # plus the simulated 24 V clamp current
 OVERSHOOTS = (0.0, 0.02, 0.04, 0.06)
 
 
-def rail_params(c_rail=C_RAIL_NOM, vset=CRIT["vset"]):
+def rail_params(c_rail=C_RAIL_EFF, vset=CRIT["vset"]):
     return {"VSET": vset, "CRAIL": c_rail, "RESR": CRIT["resr"], "RLOAD": CRIT["rload"]}
 
 
@@ -124,23 +127,18 @@ def sustained_pp(t, v):
 
 
 def stability_grid(currents):
-    """pk-pk ripple [V] per (current, C), plus waveforms (one per C) at the top current."""
+    """Sustained pk-pk ripple [V] for every (current, capacitance) pair."""
     grid = np.zeros((len(currents), len(C_SWEEP)))
-    waves = []
     for i, i_fault in enumerate(currents):
         for j, c_rail in enumerate(C_SWEEP):
-            t, v = step_response(c_rail, i_fault)
-            grid[i, j] = sustained_pp(t, v)
-            if i == len(currents) - 1:
-                waves.append((t, v))
-    return grid, waves
+            grid[i, j] = sustained_pp(*step_response(c_rail, i_fault))
+    return grid
 
 
 def plot_stability(currents, grid, waves):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(7, 7))
-    for c_rail in (3e-6, 6.21e-6, 10e-6):
-        t, v = waves[int(np.argmin(np.abs(C_SWEEP - c_rail)))]
-        ax1.plot((t - 1e-3) * 1e3, v, label=f"{c_rail * 1e6:g} µF")
+    for c_rail, (t, v) in waves.items():
+        ax1.plot((t - 1e-3) * 1e3, v, label=f"{c_rail * 1e6:.2f} µF")
     ax1.set_xlim(-0.2, 3)
     ax1.set_xlabel(f"Time after {currents[-1] * 1e3:.1f} mA fault step [ms]")
     ax1.set_ylabel("+3V3 rail [V]")
@@ -150,8 +148,9 @@ def plot_stability(currents, grid, waves):
         ax2.semilogy(C_SWEEP * 1e6, np.maximum(grid[i], floor) * 1e3, "o-",
                      label=f"{i_fault * 1e3:.1f} mA")
     ax2.axhline(CRIT["osc_pp_max"] * 1e3, ls="--", c="r", lw=0.8, label="limit")
-    ax2.axvline(C_RAIL_NOM * 1e6, ls=":", c="k", lw=0.8)
-    ax2.text(C_RAIL_NOM * 1e6, 50, " nominal", fontsize=9)
+    for c_rail, label in ((C_RAIL_V1, " V1 board"), (C_RAIL_EFF, " V2 effective")):
+        ax2.axvline(c_rail * 1e6, ls=":", c="k", lw=0.8)
+        ax2.text(c_rail * 1e6, 50, label, fontsize=9)
     ax2.set_xlabel("Effective rail capacitance [µF]")
     ax2.set_ylabel("Sustained pk-pk ripple [mV]")
     ax2.legend(title="fault current", fontsize=9)
@@ -222,14 +221,21 @@ def main():
 
     i_clamp_24 = at_fault(sweep, "i_clamp", CRIT["v_fault"])
     currents = np.append(I_SWEEP, i_clamp_24)
-    grid, waves = stability_grid(currents)
+    grid = stability_grid(currents)
+    waves = {c: step_response(c, i_clamp_24) for c in (C_RAIL_V1, C_RAIL_EFF, C_RAIL_NOM)}
     plot_stability(currents, grid, waves)
-    j_nom = int(np.argmin(np.abs(C_SWEEP - C_RAIL_NOM)))
+    pp = {c: max(sustained_pp(*step_response(c, i)) for i in currents)
+          for c in (C_RAIL_EFF, C_RAIL_NOM)}
+    c_min = min_stable_c(grid)
     rows += [
-        check("Nominal rail capacitance", C_RAIL_NOM * 1e6, "uF"),
-        check("Sustained ripple at nominal C, 24 V fault current", grid[-1, j_nom] * 1e3, "mV",
+        check("Rail capacitance, nominal", C_RAIL_NOM * 1e6, "uF"),
+        check("Rail capacitance, effective after DC bias", C_RAIL_EFF * 1e6, "uF"),
+        check("Worst sustained ripple at effective C (all currents)", pp[C_RAIL_EFF] * 1e3, "mV",
               max=CRIT["osc_pp_max"] * 1e3),
-        check("Smallest effective C stable at all currents", min_stable_c(grid) * 1e6, "uF"),
+        check("Worst sustained ripple at nominal C (all currents)", pp[C_RAIL_NOM] * 1e3, "mV",
+              max=CRIT["osc_pp_max"] * 1e3),
+        check("Smallest effective C stable at all currents", c_min * 1e6, "uF"),
+        check("Effective C / smallest stable C", C_RAIL_EFF / c_min, "x", min=1),
     ]
 
     rows += powerup_rows()
