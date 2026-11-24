@@ -17,8 +17,10 @@ Check the inductive-proximity sensor channel on the ADAM Calibration Board V2 (s
    50/60 Hz notch gets credit, and at 400 kHz, the buck frequency, where the analog filter
    gets no help.
 3. **Settling (sim 2):** time to settle after a 0 → 10 V sensor step (informational).
-4. **DC error budget (analysis 11):** full-scale error in µm of sensor distance, before and
-   after a two-point calibration, plus ADC input-range headroom.
+4. **DC error budget (analysis 11):** error in µm of target distance along the sensor's
+   output curve, before and after a two-point calibration. The requirement is
+   **≤ 5 µm after calibration**. Also checks that the sensor's measured 10.35 V saturation
+   fits in the ADC range.
 
 ## Setup
 - Model files:
@@ -29,10 +31,14 @@ Check the inductive-proximity sensor channel on the ADAM Calibration Board V2 (s
     differentially and one by a ground offset.
   - [`model/step.cir`](model/step.cir): 0 → 10 V step.
 - Monte Carlo: 500 runs, each part uniform within its tolerance. That is ±1 % for the
-  divider, ±0.1 % for Rs, ±2 % for Ccm (C0G) and ±10 % for Cdiff (assumed).
+  divider, ±0.1 % for Rs (precision), and ±2 % for Ccm and Cdiff (precision caps).
 - ADC settings for the noise and error terms: normal mode, 20 SPS, gain 1, **PGA bypassed**.
   The bypass is required because AINN sits at AVSS (V_SENSE− is GND). Datasheet values with
   table and page references are in [`inputs/ads1220.csv`](inputs/ads1220.csv).
+- Sensor curve: [`inputs/prox_sensor_curve.csv`](inputs/prox_sensor_curve.csv) is the Steel
+  FE360 curve, digitized by eye (±0.1 V) from the DW-AS-509-M12-309 typical curves. FE360 is
+  the standard rating target. The curve is scaled by 10.35/5.78: the plot saturates at 5.78 V,
+  and the real sensor measured 10.35 V.
 - Criteria and assumptions: [`inputs/criteria.csv`](inputs/criteria.csv).
 
 ## Assumptions
@@ -41,12 +47,14 @@ Check the inductive-proximity sensor channel on the ADAM Calibration Board V2 (s
   axis limits of datasheet Fig 6-21 to 6-24) and the BAV199 leakage (5 nA) only enter the
   error budget. The clamp diodes' ~2 pF is negligible next to 10 nF.
 - The noise tables were measured at AVDD = 3.3 V. This board runs the prox ADC at 5 V.
-- The sensor is linear at 10 V over 6 mm (1.67 V/mm). That is the schematic's nominal range;
-  the slope is not from a datasheet.
-- The divider resistors are 1 % thick film at 100 ppm/K, with no tracking. The lab temperature
-  changes by ±10 K between calibration and use.
-- **The 5 µm post-calibration limit is provisional.** Replace it with the ADAM accuracy
-  requirement.
+- **The real sensor's curve has the same shape as the datasheet's FE360 curve, scaled to its
+  measured 10.35 V saturation.** The sweep data (device-monitor-261115-185349) shows the scale
+  but not the distance axis, because steps/mm is not in hand. The closest point in the sweep,
+  6.7 V, maps to about 3.9 mm on the scaled curve. A different target material changes the
+  slope a lot; copper and aluminium saturate by 2.2 mm.
+- Divider resistors are either the standard 1 % thick film at 100 ppm/K, or the 0.1 %
+  precision option at 25 ppm/K (typical thin film, assumed). Neither assumes tracking. The lab
+  temperature changes by ±10 K between calibration and use.
 
 ## How to reproduce
 From the repo root with the venv active and ngspice installed (see the top-level README):
@@ -64,9 +72,9 @@ Each exits non-zero if any criterion fails.
 
 | Criterion | Result | Limit | |
 |---|---|---|---|
-| DM −3 dB corner (nominal / MC range) | 435 Hz / 397–480 Hz | n/a | info |
-| Attenuation at 256 kHz, MC worst | 57.4 dB | ≥ 50 dB | **PASS** |
-| CM-to-DM at 400 kHz, nominal / MC worst | −59.0 / −57.8 dB | ≤ −68.2 dB | **FAIL** |
+| DM −3 dB corner (nominal / MC range) | 435 Hz / 426–445 Hz | n/a | info |
+| Attenuation at 256 kHz, MC worst | 58.0 dB | ≥ 50 dB | **PASS** |
+| CM-to-DM at 400 kHz, nominal / MC worst | −59.0 / −58.5 dB | ≤ −68.2 dB | **FAIL** |
 | CM-to-DM at 60 Hz, analog only / with 20 SPS notch | −44.9 / −134.9 dB | ≤ −68.2 dB | **PASS** |
 | Settling to 0.1 % / 16 bit | 2.53 / 4.06 ms | n/a | info |
 
@@ -89,26 +97,42 @@ that rejection could be credited from, though. Conversion also peaks near −28 
 
 ![](results/figures/prox_filter_step.png)
 
+![](results/figures/prox_error_vs_distance.png)
+
+| Error budget, worst-case sum | 1 % thick film | 0.1 % thin film | Limit |
+|---|---|---|---|
+| Uncalibrated, steepest point (1.8 mm, 2.5 V/mm) | 16.1 µm | 3.8 µm | info |
+| After calibration, steepest point | 1.95 µm **PASS** | 0.93 µm **PASS** | ≤ 5 µm |
+| After calibration, measured dip (6.7 V, ~3.9 mm, 1.9 V/mm) | **7.4 µm FAIL** | 3.1 µm **PASS** | ≤ 5 µm |
+| Distance range meeting 5 µm after calibration | 0–3.4 mm | 0–4.7 mm | info |
+| Max V_IN inside ADC range (worst-case divider and reference) | 10.40 V **PASS** | 10.55 V **PASS** | ≥ 10.35 V |
+
 ![](results/figures/prox_error_budget.png)
 
-| Error at full scale (10 V, 6 mm) | Worst case | RSS | Limit | |
-|---|---|---|---|---|
-| Uncalibrated | 112 µm | 97 µm | n/a | info |
-| After two-point calibration, ±10 K | 12.2 µm | 9.9 µm | ≤ 5 µm (provisional) | **FAIL** |
-| Max V_IN inside ADC range (worst-case divider and reference) | 10.4 V | | ≥ 10 V | **PASS** |
+The sensor curve makes the budget depend on distance. Error is smallest where the curve is
+steepest, and grows quickly as it flattens toward saturation. After calibration, the divider's
+untracked resistor drift is the largest term. The ADC's own terms stay under about 1 µm at the
+steepest point, led by reference drift.
 
-Divider tolerance dominates before calibration (97 µm). After calibration the divider still
-dominates, through untracked resistor drift (9.7 µm). The ADC's own terms are all below
-2 µm, led by reference drift. With 25 ppm/K thin-film resistors for R13–R16, the divider term
-drops to about 2.4 µm and the calibrated total to about 4.9 µm. The sensor's own temperature
-drift is likely larger than any of these.
+**Headroom is tight with 1 % resistors.** The measured 10.35 V saturation is only 0.5 % below
+the worst-case ADC clipping point of 10.40 V. A unit that saturates a little higher, or runs
+warm, could clip. With 0.1 % resistors the clipping point is 10.55 V.
 
 ## Conclusions
 - Anti-aliasing passes with 7 dB of margin across tolerances.
 - CM rejection at the buck frequency fails the analog-only criterion by about 10 dB, because the
   source impedance is unbalanced. **Recommended fix:** set R26 and R28 to 2.43 kΩ, and confirm
   on hardware by measuring with the buck running.
-- After calibration, the error is set by divider drift. Use 0.1 % / 25 ppm/K thin-film parts
-  for R13–R16 if the ADAM requirement is tighter than about 10 µm.
-- Next steps: replace the provisional 5 µm limit with the real requirement, and get the sensor's
-  actual V/mm slope from its datasheet.
+- **5 µm is met at 0–3.4 mm with 1 % divider resistors, or 0–4.7 mm with 0.1 % thin film.**
+  The recorded sweep's closest point (~3.9 mm) falls outside the 1 % range. Use 0.1 %,
+  ≤ 25 ppm/K resistors for R13–R16. That also fixes the 0.5 % ADC headroom at the sensor's
+  10.35 V saturation.
+- Run measurements as close to the target as the setup allows (the steepest part of the
+  curve, near 1.5–2 mm), and keep away from saturation.
+- Next steps:
+  - Get steps/mm for the sweep rig, so the measured flank (about 27.6 mV/step) can replace
+    the scaled datasheet curve.
+  - Confirm the target material.
+  - The repeatability plot shows the fitted minimum shifting about 5 steps over sweeps 3–5,
+    and the ADS1220 and the STM32 ADC agree on the shift. So the shift comes from the sensor
+    or the mechanics, not the ADC channel.
