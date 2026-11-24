@@ -1,0 +1,15 @@
+* TVS and zener stand-ins for the reverse-polarity sim. NOT vendor models; kept with this
+* study because nothing else uses them. Q1 uses Vishay's Si2309CDS model (shared/spice_models).
+*
+* SMAJ33CA bidirectional TVS as two series zeners (breakdown 36.7 V min per the SMAJ family).
+.subckt SMAJ33CA a b
+D1 a m DTVS
+D2 b m DTVS
+.ends SMAJ33CA
+.model DTVS D(IS=1e-12 N=1 RS=0.3 BV=36.7 IBV=1m CJO=1n)
+*
+* SMAJ28A unidirectional TVS on each sensor supply (breakdown 31.1 V min per the SMAJ family).
+.model DTVS28 D(IS=1e-12 N=1 RS=0.3 BV=31.1 IBV=1m CJO=1n)
+*
+* BZT52C15 15 V zener (gate-source clamp).
+.model DZ15 D(IS=1e-14 N=1 RS=5 BV=15 IBV=5m CJO=40p)
